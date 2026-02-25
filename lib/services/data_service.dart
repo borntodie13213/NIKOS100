@@ -16,7 +16,7 @@ class DataService {
   static List<Map<String, dynamic>> _gerarJogosDemonstracao() {
     final jogos = <Map<String, dynamic>>[];
     int jogoId = 1;
-    
+
     // Definicao dos grupos e times (8 grupos com 4 times cada)
     final grupos = {
       'A': [
@@ -84,7 +84,7 @@ class DataService {
           final time2 = times[j];
           // Se um dos times for o Brasil, dobra os pontos
           final isBrasil = time1['time'] == 'Brasil' || time2['time'] == 'Brasil';
-          
+
           jogos.add({
             'id': '${jogoId++}',
             'time1': time1['time'],
@@ -109,12 +109,12 @@ class DataService {
     // ============================================
     // OITAVAS DE FINAL - 8 jogos
     // nem sei quem vai ganhar, por isso fica generico
-  
+
     for (int i = 0; i < 8; i++) {
       jogos.add({
         'id': '${jogoId++}',
-        'time1': '1o Grupo ${String.fromCharCode(65 + i)}',
-        'time2': '2o Grupo ${String.fromCharCode(65 + ((i + 1) % 8))}',
+        'time1': '1º Grupo ${String.fromCharCode(65 + i)}',
+        'time2': '2º Grupo ${String.fromCharCode(65 + ((i + 1) % 8))}',
         'bandeira1': '',
         'bandeira2': '',
         'dataHora': dataBase.add(Duration(hours: jogoNum * 4)).toIso8601String(),
@@ -174,7 +174,7 @@ class DataService {
     }
 
     // ============================================
-    // DISPUTA 3o LUGAR - 1 jogo
+    // DISPUTA 3º LUGAR - 1 jogo
     // (o jogo que ninguem quer jogar kkk)
     // ============================================
     jogos.add({
@@ -184,7 +184,7 @@ class DataService {
       'bandeira1': '',
       'bandeira2': '',
       'dataHora': dataBase.add(Duration(hours: jogoNum * 4)).toIso8601String(),
-      'fase': 'Disputa 3o Lugar',
+      'fase': 'Disputa 3º Lugar',
       'grupo': '',
       'golsTime1': null,
       'golsTime2': null,
@@ -250,7 +250,10 @@ class DataService {
   static List<Map<String, dynamic>> getPalpites() => _palpites;
 
   // Pega um palpite especifico de um usuario em um jogo
-  static Map<String, dynamic>? getPalpiteByUserAndJogo(String userId, String jogoId) {
+  static Map<String, dynamic>? getPalpiteByUserAndJogo(
+    String userId,
+    String jogoId,
+  ) {
     try {
       return _palpites.firstWhere(
         (p) => p['usuarioId'] == userId && p['jogoId'] == jogoId,
@@ -266,7 +269,7 @@ class DataService {
     final index = _palpites.indexWhere(
       (p) => p['usuarioId'] == palpite['usuarioId'] && p['jogoId'] == palpite['jogoId'],
     );
-    
+
     if (index != -1) {
       // Ja tem palpite, atualiza
       _palpites[index] = palpite;
@@ -287,7 +290,7 @@ class DataService {
     final users = AuthService.getAllUsers();
     // Ordena por pontos (maior primeiro)
     users.sort((a, b) => (b['pontos'] as int).compareTo(a['pontos'] as int));
-    
+
     // Monta a lista do ranking
     final ranking = <Map<String, dynamic>>[];
     for (int i = 0; i < users.length; i++) {
@@ -298,7 +301,7 @@ class DataService {
         'userId': users[i]['id'],
       });
     }
-    
+
     // Salva o horario do cache (pra saber quando atualizar)
     _rankingCacheTime = DateTime.now();
     return ranking;
@@ -321,7 +324,7 @@ class DataService {
       'adminId': adminId,
       'timestamp': DateTime.now().toIso8601String(),
     });
-    
+
     // Se passou de 100 logs, apaga os mais antigos
     if (_logs.length > 100) {
       _logs.removeRange(100, _logs.length);
@@ -330,4 +333,4 @@ class DataService {
 
   // Pega todos os logs (do mais recente pro mais antigo)
   static List<Map<String, dynamic>> getLogs() => _logs;
-} 
+}

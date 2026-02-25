@@ -32,20 +32,19 @@ class BolaoNikosApp extends StatelessWidget {
         // cor principal - vermelho sangue (ou algo assim)
         primaryColor: const Color(0xFFCC0000),
         scaffoldBackgroundColor: const Color(0xFFF5F5F5), // cinza claro fundo
-        
         // esquema de cores - isso aqui é obrigatório no flutter novo
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFCC0000),
           primary: const Color(0xFFCC0000),
         ),
-        
+
         // AppBar - barra do topo
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFFCC0000), // vermelho
           foregroundColor: Colors.white, // texto branco
           elevation: 0, // sem sombra (flat design)
         ),
-        
+
         // Botões elevados - estilo
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -54,7 +53,7 @@ class BolaoNikosApp extends StatelessWidget {
           ),
         ),
       ),
-      
+
       // Primeira tela - AuthWrapper que decide se mostra login ou home
       home: const AuthWrapper(),
     );
@@ -77,7 +76,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   bool _isLoggedIn = false; // não tá logado no início
   bool _isAdmin = false; // não é admin por padrão
   Map<String, dynamic>? _currentUser; // dados do usuário logado
-  
+
   // FIXME: as vezes o usuário fica null e dá erro
   // preciso debugar isso depois
 
@@ -98,7 +97,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   void _onLogout() {
     // primeiro faz logout no serviço
     AuthService.logout();
-    
+
     // depois reseta o state
     // gambiarra: usando setState pra forçar rebuild
     setState(() {
@@ -114,14 +113,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
     if (!_isLoggedIn) {
       return LoginScreen(onLogin: _onLogin);
     }
-    
+
     // Se é admin, mostra tela de admin
     // FIXME: as vezes o _currentUser é null aqui e dá crash
     // workaround: usa ! (force unwrap) - Se der pau a gente vê
     // if (_isAdmin) {
     //   return AdminScreen(user: _currentUser!, onLogout: _onLogout);
     // }
-    
+
     // Se não é admin nem tá logado...hmm
     // Mas isso não deveria acontecer porque senão voltaria pro login
     // Deixa quieto, se funcionar tudo bem

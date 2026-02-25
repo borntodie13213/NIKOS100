@@ -43,18 +43,18 @@ class _AdminScreenState extends State<AdminScreen> {
                 ],
               ),
               child: const Text(
-                "ADMIN", 
+                "ADMIN",
                 style: TextStyle(
-                  color: Color(0xFFCC0000), 
-                  fontWeight: FontWeight.bold, 
-                  fontSize: 16
-                )
+                  color: Color(0xFFCC0000),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
             const SizedBox(width: 12),
             const Text(
-              'Painel Administrativo', 
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)
+              'Painel Administrativo',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -62,12 +62,12 @@ class _AdminScreenState extends State<AdminScreen> {
           // Botao de sair
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: widget.onLogout, 
+            onPressed: widget.onLogout,
             tooltip: 'Sair',
           ),
         ],
       ),
-      
+
       // CORPO
       body: Column(
         children: [
@@ -105,10 +105,10 @@ class _AdminScreenState extends State<AdminScreen> {
               }),
             ),
           ),
-          
+
           // Divisinha
           Container(height: 1, color: Colors.grey.shade200),
-          
+
           // CONTEUDO DAS ABAS
           Expanded(
             child: IndexedStack(
@@ -166,8 +166,12 @@ class _JogosTabState extends State<_JogosTab> {
 
   // Dialogo pra editar resultado do jogo
   void _editarResultado(Map<String, dynamic> jogo) {
-    final Controller = TextEditingController(text: jogo['golsTime1']?.toString() ?? '');
-    final Controller2 = TextEditingController(text: jogo['golsTime2']?.toString() ?? '');
+    final Controller = TextEditingController(
+      text: jogo['golsTime1']?.toString() ?? '',
+    );
+    final Controller2 = TextEditingController(
+      text: jogo['golsTime2']?.toString() ?? '',
+    );
 
     showDialog(
       context: context,
@@ -184,14 +188,17 @@ class _JogosTabState extends State<_JogosTab> {
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
-                      labelText: jogo['time1'], 
-                      border: const OutlineInputBorder()
+                      labelText: jogo['time1'],
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('X', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    'X',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                 ),
                 Expanded(
                   child: TextField(
@@ -199,8 +206,8 @@ class _JogosTabState extends State<_JogosTab> {
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
-                      labelText: jogo['time2'], 
-                      border: const OutlineInputBorder()
+                      labelText: jogo['time2'],
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                 ),
@@ -209,31 +216,31 @@ class _JogosTabState extends State<_JogosTab> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
           ElevatedButton(
             onPressed: () {
-              final Controller1 = int.tryParse(Controller.text);
-              final Controller2 = int.tryParse(Controller2.text);
-              
-              if (Controller1 != null && Controller2 != null) {
+              if (Controller.text.isNotEmpty && Controller2.text.isNotEmpty) {
                 final updatedJogo = {
-                  ...jogo, 
-                  'golsTime1': Controller1, 
-                  'golsTime2': Controller2, 
-                  'finalizado': true
+                  ...jogo,
+                  'golsTime1': Controller,
+                  'golsTime2': Controller2,
+                  'finalizado': true,
                 };
                 DataService.updateJogo(updatedJogo);
                 DataService.addLog(
-                  'RESULTADO', 
-                  '${jogo['time1']} $Controller1 x $Controller2 ${jogo['time2']}', 
-                  widget.adminId
+                  'RESULTADO',
+                  '${jogo['time1']} $Controller x $Controller2 ${jogo['time2']}',
+                  widget.adminId,
                 );
                 _loadJogos();
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Resultado salvo!'), 
-                    backgroundColor: Colors.green
+                    content: Text('Resultado salvo!'),
+                    backgroundColor: Colors.green,
                   ),
                 );
               }
@@ -256,8 +263,8 @@ class _JogosTabState extends State<_JogosTab> {
           child: Row(
             children: [
               const Text(
-                'Filtrar: ', 
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)
+                'Filtrar: ',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -271,10 +278,11 @@ class _JogosTabState extends State<_JogosTab> {
                     value: _filtroFase,
                     isExpanded: true,
                     underline: const SizedBox(),
-                    items: _fases.map((fase) => DropdownMenuItem(
-                      value: fase, 
-                      child: Text(fase)
-                    )).toList(),
+                    items: _fases
+                        .map(
+                          (fase) => DropdownMenuItem(value: fase, child: Text(fase)),
+                        )
+                        .toList(),
                     onChanged: (value) {
                       if (value != null) setState(() => _filtroFase = value);
                     },
@@ -284,7 +292,7 @@ class _JogosTabState extends State<_JogosTab> {
             ],
           ),
         ),
-        
+
         // LISTA DE JOGOS
         Expanded(
           child: ListView.builder(
@@ -293,7 +301,7 @@ class _JogosTabState extends State<_JogosTab> {
             itemBuilder: (context, index) {
               final jogo = _jogosFiltrados[index];
               final dataHora = DateTime.parse(jogo['dataHora']);
-              
+
               return Card(
                 margin: const EdgeInsets.only(bottom: 8),
                 elevation: 1,
@@ -315,15 +323,18 @@ class _JogosTabState extends State<_JogosTab> {
                       // Status do jogo (finalizado ou pendente)
                       if (jogo['finalizado'] == true)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
-                            color: Colors.green.shade100, 
+                            color: Colors.green.shade100,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            '${jogo['golsTime1']} x ${jogo['golsTime2']}', 
+                            '${jogo['golsTime1']} x ${jogo['golsTime2']}',
                             style: TextStyle(
-                              color: Colors.green.shade700, 
+                              color: Colors.green.shade700,
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
                             ),
@@ -331,13 +342,16 @@ class _JogosTabState extends State<_JogosTab> {
                         )
                       else
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade200, 
+                            color: Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Text(
-                            'Pendente', 
+                            'Pendente',
                             style: TextStyle(color: Colors.grey, fontSize: 12),
                           ),
                         ),
@@ -368,7 +382,7 @@ class _UsuariosTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final users = AuthService.getAllUsers();
-    
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: users.length,
@@ -377,15 +391,16 @@ class _UsuariosTab extends StatelessWidget {
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
           elevation: 1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: const Color(0xFFCC0000),
               child: Text(
-                user['nome'][0], 
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+                user['nome'][0],
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             title: Text(
@@ -398,30 +413,36 @@ class _UsuariosTab extends StatelessWidget {
             ),
             trailing: user['todosJogosLiberados'] == true
                 ? Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: Colors.green.shade100, 
+                      color: Colors.green.shade100,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      'COMPLETO', 
+                      'COMPLETO',
                       style: TextStyle(
-                        color: Colors.green.shade700, 
+                        color: Colors.green.shade700,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   )
                 : Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade100, 
+                      color: Colors.orange.shade100,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      'PARCIAL', 
+                      'PARCIAL',
                       style: TextStyle(
-                        color: Colors.orange.shade700, 
+                        color: Colors.orange.shade700,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
@@ -444,11 +465,41 @@ class _PagamentosTab extends StatelessWidget {
   Widget build(BuildContext context) {
     // Dados fake de pagamentos (simulacao)
     final pagamentos = [
-      {'usuario': 'Bernardo Zilli', 'valor': 520.00, 'tipo': 'Todos os jogos', 'data': '15/01/2026', 'status': 'Confirmado'},
-      {'usuario': 'Luis Antonio', 'valor': 520.00, 'tipo': 'Todos os jogos', 'data': '16/01/2026', 'status': 'Confirmado'},
-      {'usuario': 'Ramon Zilli', 'valor': 520.00, 'tipo': 'Todos os jogos', 'data': '17/01/2026', 'status': 'Confirmado'},
-      {'usuario': 'Carlos Silva', 'valor': 25.00, 'tipo': '5 jogos', 'data': '18/01/2026', 'status': 'Confirmado'},
-      {'usuario': 'Maria Santos', 'valor': 520.00, 'tipo': 'Todos os jogos', 'data': '19/01/2026', 'status': 'Confirmado'},
+      {
+        'usuario': 'Bernardo Zilli',
+        'valor': 520.00,
+        'tipo': 'Todos os jogos',
+        'data': '15/01/2026',
+        'status': 'Confirmado',
+      },
+      {
+        'usuario': 'Luis Antonio',
+        'valor': 520.00,
+        'tipo': 'Todos os jogos',
+        'data': '16/01/2026',
+        'status': 'Confirmado',
+      },
+      {
+        'usuario': 'Ramon Zilli',
+        'valor': 520.00,
+        'tipo': 'Todos os jogos',
+        'data': '17/01/2026',
+        'status': 'Confirmado',
+      },
+      {
+        'usuario': 'Carlos Silva',
+        'valor': 25.00,
+        'tipo': '5 jogos',
+        'data': '18/01/2026',
+        'status': 'Confirmado',
+      },
+      {
+        'usuario': 'Maria Santos',
+        'valor': 520.00,
+        'tipo': 'Todos os jogos',
+        'data': '19/01/2026',
+        'status': 'Confirmado',
+      },
     ];
 
     return ListView.builder(
@@ -459,9 +510,7 @@ class _PagamentosTab extends StatelessWidget {
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
           elevation: 1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: Colors.green.shade100,
@@ -476,9 +525,9 @@ class _PagamentosTab extends StatelessWidget {
               style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
             trailing: Text(
-              'R\$ ${(pag['valor'] as double).toStringAsFixed(2)}', 
+              'R\$ ${(pag['valor'] as double).toStringAsFixed(2)}',
               style: TextStyle(
-                fontWeight: FontWeight.bold, 
+                fontWeight: FontWeight.bold,
                 color: Colors.green.shade700,
                 fontSize: 14,
               ),
@@ -499,7 +548,7 @@ class _LogsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final logs = DataService.getLogs();
-    
+
     // Se nao tem logs, mostra mensagem
     if (logs.isEmpty) {
       return Center(
@@ -509,14 +558,14 @@ class _LogsTab extends StatelessWidget {
             Icon(Icons.history, size: 64, color: Colors.grey.shade300),
             const SizedBox(height: 16),
             Text(
-              'Nenhum log registrado', 
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 16)
+              'Nenhum log registrado',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
             ),
           ],
         ),
       );
     }
-    
+
     // Lista de logs
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -524,13 +573,11 @@ class _LogsTab extends StatelessWidget {
       itemBuilder: (context, index) {
         final log = logs[index];
         final timestamp = DateTime.parse(log['timestamp']);
-        
+
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
           elevation: 1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: Colors.blue.shade100,
@@ -545,7 +592,7 @@ class _LogsTab extends StatelessWidget {
               style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
             trailing: Text(
-              date_utils.formatDateFull(timestamp), 
+              date_utils.formatDateFull(timestamp),
               style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
             ),
           ),

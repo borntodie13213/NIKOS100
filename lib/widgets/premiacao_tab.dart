@@ -44,7 +44,11 @@ class PremiacaoTab extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.emoji_events, color: Colors.white, size: 48),
+                  child: const Icon(
+                    Icons.emoji_events,
+                    color: Colors.white,
+                    size: 48,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 const Text(
@@ -76,7 +80,7 @@ class PremiacaoTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // PREMIOS - Lista dos 5 primeiros lugares
           // GAMBIARRA: Parametro destaque para o primeiro lugar
           _buildPremioCard(
@@ -84,7 +88,7 @@ class PremiacaoTab extends StatelessWidget {
             premio: 'R\$ 5.000,00',
             descricao: 'via PIX',
             cor: Colors.amber,
-            icone: '1o',
+            icone: '1º',
             destaque: true,
           ),
           _buildPremioCard(
@@ -92,32 +96,32 @@ class PremiacaoTab extends StatelessWidget {
             premio: 'TV 50 Polegadas',
             descricao: 'Smart TV LED',
             cor: Colors.grey.shade400,
-            icone: '2o',
+            icone: '2º',
           ),
           _buildPremioCard(
             posicao: 3,
             premio: 'R\$ 1.000,00',
             descricao: 'em compras no Nikos',
             cor: Colors.brown.shade300,
-            icone: '3o',
+            icone: '3º',
           ),
           _buildPremioCard(
             posicao: 4,
             premio: 'R\$ 500,00',
             descricao: 'em compras no Nikos',
             cor: Colors.grey.shade300,
-            icone: '4o',
+            icone: '4º',
           ),
           _buildPremioCard(
             posicao: 5,
             premio: 'R\$ 250,00',
             descricao: 'em compras no Nikos',
             cor: Colors.grey.shade200,
-            icone: '5o',
+            icone: '5º',
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // OBSERVACAO FINAL - Texto complementar
           Container(
             width: double.infinity,
@@ -134,10 +138,7 @@ class PremiacaoTab extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Os premios serao entregues em ate 30 dias apos o termino do bolao.',
-                    style: TextStyle(
-                      color: Colors.grey.shade700,
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
                   ),
                 ),
               ],
@@ -163,9 +164,7 @@ class PremiacaoTab extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: destaque
-          ? Border.all(color: Colors.amber.shade300, width: 2)
-          : null,
+        border: destaque ? Border.all(color: Colors.amber.shade300, width: 2) : null,
         boxShadow: [
           BoxShadow(
             color: Colors.grey.shade200,
@@ -188,12 +187,12 @@ class PremiacaoTab extends StatelessWidget {
               ),
               // GAMBIARRA: Gradiente especial para primeiro lugar
               gradient: destaque
-                ? LinearGradient(
-                    colors: [Colors.amber.shade400, Colors.amber.shade600],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                : null,
+                  ? LinearGradient(
+                      colors: [Colors.amber.shade400, Colors.amber.shade600],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                  : null,
             ),
             child: Center(
               child: Text(
@@ -206,7 +205,7 @@ class PremiacaoTab extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // LADO DIREITO - Detalhes do premio
           Expanded(
             child: Padding(
@@ -214,7 +213,7 @@ class PremiacaoTab extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Texto "1o Colocado" etc
+                  // Texto "1º Colocado" etc
                   Text(
                     '${posicao}o Colocado',
                     style: TextStyle(
@@ -224,7 +223,7 @@ class PremiacaoTab extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  
+
                   // Premio em destaque vermelho
                   Text(
                     premio,
@@ -235,29 +234,22 @@ class PremiacaoTab extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  
+
                   // Descricao secundaria
                   Text(
                     descricao,
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                   ),
                 ],
               ),
             ),
           ),
-          
+
           // ICONE DE TROFEU para primeiros lugares
           if (posicao <= 3)
             Padding(
               padding: const EdgeInsets.only(right: 16),
-              child: Icon(
-                Icons.emoji_events,
-                color: cor,
-                size: 28,
-              ),
+              child: Icon(Icons.emoji_events, color: cor, size: 28),
             ),
         ],
       ),

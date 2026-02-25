@@ -24,7 +24,7 @@ class _RankingTabState extends State<RankingTab> {
 
   void _loadRanking({bool force = false}) {
     final ranking = DataService.getRanking(forceRefresh: force);
-    
+
     int pos = 0;
     int pontos = 0;
     for (var item in ranking) {
@@ -34,7 +34,7 @@ class _RankingTabState extends State<RankingTab> {
         break;
       }
     }
-    
+
     setState(() {
       _ranking = ranking;
       _userPosition = pos;
@@ -131,7 +131,7 @@ class _RankingTabState extends State<RankingTab> {
             ],
           ),
         ),
-        
+
         // BARRA DE ATUALIZACAO - Aviso que atualiza a cada 5 minutos
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -170,7 +170,7 @@ class _RankingTabState extends State<RankingTab> {
             ],
           ),
         ),
-        
+
         // TITULO DO RANKING
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
@@ -188,7 +188,7 @@ class _RankingTabState extends State<RankingTab> {
             ],
           ),
         ),
-        
+
         // LISTA DO RANKING - Top 20
         Expanded(
           child: ListView.builder(
@@ -197,7 +197,7 @@ class _RankingTabState extends State<RankingTab> {
             itemBuilder: (context, index) {
               final item = _ranking[index];
               final isCurrentUser = item['userId'] == widget.user['id'];
-              
+
               return _buildRankingItem(item, isCurrentUser);
             },
           ),
@@ -256,7 +256,7 @@ class _RankingTabState extends State<RankingTab> {
             ),
           ),
           const SizedBox(width: 16),
-          
+
           // Nome do usuario
           Expanded(
             child: Text(
@@ -268,7 +268,7 @@ class _RankingTabState extends State<RankingTab> {
               ),
             ),
           ),
-          
+
           // Medalha para top 3
           _buildMedalha(item['posicao']),
         ],
@@ -339,17 +339,21 @@ class _RankingTabState extends State<RankingTab> {
         ),
       );
     }
-    
+
     return const SizedBox.shrink();
   }
 
   // CORES DAS POSICOES - Top 3 tem cores especiais
   Color _getPosicaoColor(int posicao) {
     switch (posicao) {
-      case 1: return Colors.amber;
-      case 2: return Colors.grey.shade400;
-      case 3: return Colors.brown.shade400;
-      default: return Colors.grey.shade200;
+      case 1:
+        return Colors.amber;
+      case 2:
+        return Colors.grey.shade400;
+      case 3:
+        return Colors.brown.shade400;
+      default:
+        return Colors.grey.shade200;
     }
   }
 }

@@ -238,7 +238,7 @@
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Transformations" id="2oI-Rn-ZJC">
+                            <menuItem title="Transformations" id="2ºI-Rn-ZJC">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Transformations" id="c8a-y6-VQd">
                                     <items>
@@ -307,7 +307,7 @@
                                     <action selector="performMiniaturize:" target="-1" id="VwT-WD-YPe"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Zoom" id="R4o-n2-Eq4">
+                            <menuItem title="Zoom" id="R4º-n2-Eq4">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="performZoom:" target="-1" id="DIl-cC-cCs"/>

@@ -20,7 +20,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   // Aba selecionada no momento (0 = Palpites, 1 = Ranking, etc)
   int _selectedIndex = 0;
-  
+
   // Titulos das abas (na mesma ordem do IndexedStack)
   final List<String> _tabTitles = ['Palpites', 'Ranking', 'Premiacao', 'Regulamento', 'Conta'];
 
@@ -45,32 +45,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               child: const Text(
-                "BOLAO NIKOS", 
-                style: TextStyle(
-                  color: Color(0xFFCC0000), 
-                  fontWeight: FontWeight.bold, 
-                  fontSize: 16
-                )
+                "BOLAO NIKOS",
+                style: TextStyle(color: Color(0xFFCC0000), fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
             const Spacer(),
             // Saudacao com o primeiro nome do usuario
-            Text(
-              'Ola, ${widget.user['nome']?.split(' ').first ?? 'Usuario'}', 
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)
-            ),
+            Text('Ola, ${widget.user['nome']?.split(' ').first ?? 'Usuario'}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
           ],
         ),
         actions: [
           // Botao de sair (logout)
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: widget.onLogout, 
+            onPressed: widget.onLogout,
             tooltip: 'Sair',
           ),
         ],
       ),
-      
+
       // CORPO DA TELA - abas e conteudo
       body: Column(
         children: [
@@ -109,10 +102,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          
+
           // Divisinha entre abas e conteudo
           Container(height: 1, color: Colors.grey.shade200),
-          
+
           // CONTEUDO DAS ABAS - IndexedStack pra nao recarregar
           Expanded(
             child: IndexedStack(
@@ -129,18 +122,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      
+
       // BARRA DO RODAPE - copyright e tal
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(12),
         color: const Color(0xFFCC0000),
         child: const Text(
           '2026 Bolao Nikos - Todos os direitos reservados',
-          style: TextStyle(
-            color: Colors.white70, 
-            fontSize: 12
-          ), 
-          textAlign: TextAlign.center
+          style: TextStyle(color: Colors.white70, fontSize: 12),
+          textAlign: TextAlign.center,
         ),
       ),
     );

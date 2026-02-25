@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // Widget principal da tela de regulamento
-// Se não funcionar, deu ruim 
+// Se não funcionar, deu ruim
 class RegulamentoTab extends StatelessWidget {
   const RegulamentoTab({super.key});
 
@@ -73,7 +73,7 @@ class RegulamentoTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Seções do regulamento - cada uma com seu método próprio
           // (deixa o código mais organizado sei la)
           _buildSection(
@@ -153,7 +153,7 @@ class RegulamentoTab extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          
+
           // Rodapé com contato - porque alguém vai ter dúvidas
           Container(
             width: double.infinity,
@@ -213,7 +213,7 @@ class RegulamentoTab extends StatelessWidget {
   }
 
   // GAMBIARRA: Método genérico que constrói qualquer seção
-  // Feito às 3 da manhã, mas funciona PERFEITAMENTE 
+  // Feito às 3 da manhã, mas funciona PERFEITAMENTE
   Widget _buildSection({
     required String titulo,
     required List<String> items,
@@ -233,9 +233,7 @@ class RegulamentoTab extends StatelessWidget {
           ),
         ],
         // Gambiarra: borda vermelha se for seção importante
-        border: destaque 
-          ? Border.all(color: Colors.red.shade300, width: 1)
-          : null,
+        border: destaque ? Border.all(color: Colors.red.shade300, width: 1) : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,9 +244,7 @@ class RegulamentoTab extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: destaque 
-                  ? [Color(0xFFE53935), Color(0xFFCC0000)]
-                  : [Color(0xFFCC0000), Color(0xFF990000)],
+                colors: destaque ? [Color(0xFFE53935), Color(0xFFCC0000)] : [Color(0xFFCC0000), Color(0xFF990000)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -318,4 +314,4 @@ class RegulamentoTab extends StatelessWidget {
       ),
     );
   }
-}  
+}

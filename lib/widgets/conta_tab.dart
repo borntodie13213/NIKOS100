@@ -12,7 +12,7 @@ class ContaTab extends StatelessWidget {
     // Pegando os palpites do cara e os jogos
     final palpites = DataService.getPalpites().where((p) => p['usuarioId'] == user['id']).toList();
     final jogos = DataService.getJogos();
-    
+
     // Calculando quantos jogos já acabaram
     int jogosFinalizados = jogos.where((j) => j['finalizado'] == true).length;
     int palpitesFeitos = palpites.length;
@@ -53,7 +53,10 @@ class ContaTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 // Nome dele
-                Text(user['nome'] ?? 'Usuario', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                Text(
+                  user['nome'] ?? 'Usuario',
+                  style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 4),
                 // CPF mascarado (só mostra os 3 primeiros e 2 últimos)
                 Text('CPF: ${_formatCPF(user['cpf'])}', style: const TextStyle(color: Colors.white70, fontSize: 14)),
@@ -61,26 +64,34 @@ class ContaTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // CARDS DE ESTATÍSTICA - linha 1
           Row(
             children: [
-              Expanded(child: _buildStatCard(icon: Icons.sports_soccer, label: 'Palpites Feitos', value: '$palpitesFeitos')),
+              Expanded(
+                child: _buildStatCard(icon: Icons.sports_soccer, label: 'Palpites Feitos', value: '$palpitesFeitos'),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _buildStatCard(icon: Icons.stars, label: 'Pontos Atuais', value: '${user['pontos']}')),
+              Expanded(
+                child: _buildStatCard(icon: Icons.stars, label: 'Pontos Atuais', value: '${user['pontos']}'),
+              ),
             ],
           ),
           const SizedBox(height: 16),
           // CARDS DE ESTATÍSTICA - linha 2
           Row(
             children: [
-              Expanded(child: _buildStatCard(icon: Icons.check_circle, label: 'Jogos Finalizados', value: '$jogosFinalizados')),
+              Expanded(
+                child: _buildStatCard(icon: Icons.check_circle, label: 'Jogos Finalizados', value: '$jogosFinalizados'),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _buildStatCard(icon: Icons.schedule, label: 'Jogos Restantes', value: '${jogos.length - jogosFinalizados}')),
+              Expanded(
+                child: _buildStatCard(icon: Icons.schedule, label: 'Jogos Restantes', value: '${jogos.length - jogosFinalizados}'),
+              ),
             ],
           ),
           const SizedBox(height: 24),
-          
+
           // BOX DE STATUS - se ele pagou tudo ou não
           Container(
             width: double.infinity,
@@ -88,9 +99,7 @@ class ContaTab extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(color: Colors.grey.shade200, blurRadius: 6, offset: const Offset(0, 3))
-              ],
+              boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 6, offset: const Offset(0, 3))],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,9 +130,7 @@ class ContaTab extends StatelessWidget {
                           ),
                           // Texto pequeno explicativo
                           Text(
-                            user['todosJogosLiberados'] == true
-                                ? 'Voce tem acesso a todos os 104 jogos'
-                                : 'Voce tem acesso apenas aos jogos pagos',
+                            user['todosJogosLiberados'] == true ? 'Voce tem acesso a todos os 104 jogos' : 'Voce tem acesso apenas aos jogos pagos',
                             style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                           ),
                         ],
@@ -135,7 +142,7 @@ class ContaTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // BOX DE INFORMAÇÕES - dados do usuário
           Container(
             width: double.infinity,
@@ -143,9 +150,7 @@ class ContaTab extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(color: Colors.grey.shade200, blurRadius: 6, offset: const Offset(0, 3))
-              ],
+              boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 6, offset: const Offset(0, 3))],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,14 +165,17 @@ class ContaTab extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // BOTÃO DE SAIR - vermelho outline
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: onLogout,
               icon: const Icon(Icons.logout, color: Color(0xFFCC0000)),
-              label: const Text('SAIR DA CONTA', style: TextStyle(color: Color(0xFFCC0000), fontWeight: FontWeight.bold)),
+              label: const Text(
+                'SAIR DA CONTA',
+                style: TextStyle(color: Color(0xFFCC0000), fontWeight: FontWeight.bold),
+              ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Color(0xFFCC0000), width: 2),
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -189,9 +197,7 @@ class ContaTab extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(color: Colors.grey.shade200, blurRadius: 6, offset: const Offset(0, 3))
-        ],
+        boxShadow: [BoxShadow(color: Colors.grey.shade200, blurRadius: 6, offset: const Offset(0, 3))],
       ),
       child: Column(
         children: [

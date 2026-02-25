@@ -2,7 +2,7 @@
 class AuthService {
   // Usuario logado no momento (null se ninguem ta logado)
   static Map<String, dynamic>? _currentUser;
-  
+
   // ============================================
   // USUARIOS DE DEMONSTRACAO
   // esses sao os usuarios fake que a gente usa pra testar
@@ -101,7 +101,7 @@ class AuthService {
   static Map<String, dynamic>? login(String cpf, String dataNascimento) {
     // Limpa o CPF (tira pontos, tracos, etc)
     final cpfLimpo = cpf.replaceAll(RegExp(r'[^0-9]'), '');
-    
+
     // Procura o usuario na lista
     for (var user in _users) {
       // Se CPF e data batem, usuario encontrado
@@ -134,4 +134,4 @@ class AuthService {
       _users[index] = updatedUser;
     }
   }
-} 
+}
