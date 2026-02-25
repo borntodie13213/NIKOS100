@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 // se não existir vai dar pau, mas por agora OK
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
-import 'screens/admin_screen.dart';
+// import 'screens/admin_screen.dart';
 import 'services/auth_service.dart';
 
 // Inicializa o app
@@ -118,9 +118,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
     // Se é admin, mostra tela de admin
     // FIXME: as vezes o _currentUser é null aqui e dá crash
     // workaround: usa ! (force unwrap) - Se der pau a gente vê
-    if (_isAdmin) {
-      return AdminScreen(user: _currentUser!, onLogout: _onLogout);
-    }
+    // if (_isAdmin) {
+    //   return AdminScreen(user: _currentUser!, onLogout: _onLogout);
+    // }
     
     // Se não é admin nem tá logado...hmm
     // Mas isso não deveria acontecer porque senão voltaria pro login

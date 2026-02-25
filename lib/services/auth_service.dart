@@ -1,6 +1,12 @@
+// SERVICO DE AUTENTICACAO - gerencia login, logout e usuarios
 class AuthService {
+  // Usuario logado no momento (null se ninguem ta logado)
   static Map<String, dynamic>? _currentUser;
   
+  // ============================================
+  // USUARIOS DE DEMONSTRACAO
+  // esses sao os usuarios fake que a gente usa pra testar
+
   static final List<Map<String, dynamic>> _users = [
     {
       'id': '1',
@@ -76,32 +82,56 @@ class AuthService {
     },
   ];
 
+  // ============================================
+  // METODOS DE USUARIOS
+  // ============================================
+
+  // Pega todos os usuarios (menos o admin)
+  // O admin nao aparece no ranking, so no sistema
   static List<Map<String, dynamic>> getAllUsers() {
     return _users.where((u) => u['isAdmin'] != true).toList();
   }
 
+  // ============================================
+  // METODOS DE LOGIN/LOGOUT
+  // ============================================
+
+  // Faz login com CPF e data de nascimento
+  // Retorna o usuario se der certo, ou null se der errado
   static Map<String, dynamic>? login(String cpf, String dataNascimento) {
+    // Limpa o CPF (tira pontos, tracos, etc)
     final cpfLimpo = cpf.replaceAll(RegExp(r'[^0-9]'), '');
     
+    // Procura o usuario na lista
     for (var user in _users) {
+      // Se CPF e data batem, usuario encontrado
       if (user['cpf'] == cpfLimpo && user['dataNascimento'] == dataNascimento) {
-        _currentUser = user;
-        return user;
+        _currentUser = user; // Salva como usuario atual
+        return user; // Devolve o usuario
       }
     }
-    return null;
+    return null; // Nao achou ninguem
   }
 
+  // Pega o usuario que ta logado agora
+  // Pode ser null se ninguem estiver logado
   static Map<String, dynamic>? getCurrentUser() => _currentUser;
 
+  // Faz logout (limpa o usuario atual)
   static void logout() {
     _currentUser = null;
   }
 
+  // ============================================
+  // METODOS DE ATUALIZACAO
+  // ============================================
+
+  // Atualiza os dados de um usuario
+  // Acha pelo ID e substitui na lista
   static void updateUser(Map<String, dynamic> updatedUser) {
     final index = _users.indexWhere((u) => u['id'] == updatedUser['id']);
     if (index != -1) {
       _users[index] = updatedUser;
     }
   }
-}
+} 

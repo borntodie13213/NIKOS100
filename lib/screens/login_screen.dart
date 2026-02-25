@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/auth_service.dart';
 
+// TELA DE LOGIN - primeira coisa que o usuario ve
+// Se nao logar, nao entra no app nao
 class LoginScreen extends StatefulWidget {
   final Function(Map<String, dynamic>) onLogin;
 
@@ -12,25 +14,33 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // Controllers dos campos de texto
   final _cpfController = TextEditingController();
   final _diaController = TextEditingController();
   final _mesController = TextEditingController();
   final _anoController = TextEditingController();
   
+  // Estados da tela
   bool _isLoading = false;
   String? _errorMessage;
 
+  // ============================================
+  // LOGIN - valida e loga o usuario
+  // ============================================
   void _login() {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
+    // Limpa o CPF (tira pontos, tracos, espacos)
     final cpf = _cpfController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    // Formata a data (garante que tem 2 digitos no dia e mes)
     final dia = _diaController.text.padLeft(2, '0');
     final mes = _mesController.text.padLeft(2, '0');
     final ano = _anoController.text;
 
+    // Valida CPF (tem que ter 11 digitos)
     if (cpf.length != 11) {
       setState(() {
         _isLoading = false;
@@ -39,6 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    // Valida data (nao pode ter campo vazio e ano tem que ter 4 digitos)
     if (dia.isEmpty || mes.isEmpty || ano.isEmpty || ano.length != 4) {
       setState(() {
         _isLoading = false;
@@ -47,9 +58,12 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    // Monta a data no formato que o servico espera (AAAA-MM-DD)
     final dataNascimento = '$ano-$mes-$dia';
+    // Chama o servico de login
     final user = AuthService.login(cpf, dataNascimento);
 
+    // Se achou usuario, entra. Se nao, mostra erro.
     if (user != null) {
       widget.onLogin(user);
     } else {
@@ -63,17 +77,19 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Fundo vermelho (cor do bolao)
       backgroundColor: const Color(0xFFCC0000),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Container(
+              // Largura maxima pra nao esticar demais em telas grandes
               constraints: const BoxConstraints(maxWidth: 400),
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withAlpha(50),
@@ -85,8 +101,9 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // TITULO BOLAO NIKOS
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     decoration: BoxDecoration(
                       color: const Color(0xFFCC0000),
                       borderRadius: BorderRadius.circular(8),
@@ -108,6 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 32),
                   
+                  // CAMPO CPF
                   const Align(
                     alignment: Alignment.centerLeft,
                     child: Text('CPF', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
@@ -116,6 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextField(
                     controller: _cpfController,
                     keyboardType: TextInputType.number,
+                    // So aceita numeros e no maximo 11 digitos
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
                       LengthLimitingTextInputFormatter(11),
@@ -128,6 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 24),
                   
+                  // CAMPO DATA DE NASCIMENTO
                   const Align(
                     alignment: Alignment.centerLeft,
                     child: Text('Data de Nascimento', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
@@ -135,6 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
+                      // DIA
                       Expanded(
                         flex: 2,
                         child: TextField(
@@ -150,8 +171,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Text('/', style: TextStyle(fontSize: 20)),
+                      const Text('/', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                       const SizedBox(width: 8),
+                      // MES
                       Expanded(
                         flex: 2,
                         child: TextField(
@@ -167,8 +189,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Text('/', style: TextStyle(fontSize: 20)),
+                      const Text('/', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                       const SizedBox(width: 8),
+                      // ANO
                       Expanded(
                         flex: 3,
                         child: TextField(
@@ -186,6 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   
+                  // MENSAGEM DE ERRO (so aparece quando tem erro)
                   if (_errorMessage != null) ...[
                     const SizedBox(height: 16),
                     Container(
@@ -207,6 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   
                   const SizedBox(height: 32),
                   
+                  // BOTAO ENTRAR
                   SizedBox(
                     width: double.infinity,
                     height: 48,
@@ -224,6 +249,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   
                   const SizedBox(height: 24),
                   
+                  // INFORMACOES EXTRAS
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -240,17 +266,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   
                   const SizedBox(height: 16),
+                  
+                  // USUARIOS DE TESTE (pra facilitar a vida de quem ta testando)
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Colors.blue.shade50,
                       borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: Colors.blue.shade200),
                     ),
-                    child: const Column(
+                    child: Column(
                       children: [
-                        Text('USUARIOS DE TESTE:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                        Text('CPF: 12345678901 | Data: 15/05/1990', style: TextStyle(fontSize: 10)),
-                        Text('Admin: 00000000000 | Data: 01/01/1980', style: TextStyle(fontSize: 10)),
+                        Text('USUARIOS DE TESTE:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.blue.shade700)),
+                        const SizedBox(height: 4),
+                        const Text('CPF: 12345678901 | Data: 15/05/1990', style: TextStyle(fontSize: 10)),
+                        const Text('Admin: 00000000000 | Data: 01/01/1980', style: TextStyle(fontSize: 10)),
                       ],
                     ),
                   ),
@@ -263,6 +293,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+
+  // DISPOSE - limpa os controllers quando sai da tela
+  // (importante pra nao dar memory leak)
   @override
   void dispose() {
     _cpfController.dispose();
@@ -271,4 +304,4 @@ class _LoginScreenState extends State<LoginScreen> {
     _anoController.dispose();
     super.dispose();
   }
-}
+} 
