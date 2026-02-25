@@ -16,11 +16,7 @@ class _PalpitesTabState extends State<PalpitesTab> {
   List<Map<String, dynamic>> _jogos = [];
   Map<String, Map<String, dynamic>> _palpites = {};
   String _filtroFase = 'Todos';
-  int _clickCount = 0;
-  bool _showProcessingBug = false;
-  DateTime? _lastClickTime;
-  bool _waitingSecondClick = false;
-  String? _pendingSaveJogoId;
+  bool showProcessingBug = false;
 
   @override
   void initState() {
@@ -31,14 +27,14 @@ class _PalpitesTabState extends State<PalpitesTab> {
   void _loadData() {
     final jogos = DataService.getJogos();
     final palpites = DataService.getPalpites();
-    
+
     final userPalpites = <String, Map<String, dynamic>>{};
     for (var p in palpites) {
       if (p['usuarioId'] == widget.user['id']) {
         userPalpites[p['jogoId']] = p;
       }
     }
-    
+
     setState(() {
       _jogos = jogos;
       _palpites = userPalpites;
@@ -66,62 +62,6 @@ class _PalpitesTabState extends State<PalpitesTab> {
     return DateTime.now().isAfter(dataHora.subtract(const Duration(hours: 1)));
   }
 
-  void _handleSaveClick(String jogoId, int gols1, int gole) {
-    final now = DateTime.now();
-    
-    if (_lastClickTime != null && now.difference(_lastClickTime!).inMilliseconds < 500) {
-      _clickCount++;
-      if (_clickCount >= 10) {
-        setState(() => _showProcessingBug = true);
-        return;
-      }
-    } else {
-      _clickCount = 1;
-    }
-    _lastClickTime = now;
-    
-    if (_waitingSecondClick && _pendingSaveJogoId == jogoId) {
-      _savePalpite(jogoId, gole, gole);
-      _waitingSecondClick = false;
-      _pendingSaveJogoId = null;
-    } else {
-      _waitingSecondClick = true;
-      _pendingSaveJogoId = jogoId;
-      
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (_pendingSaveJogoId == jogoId) {
-          _waitingSecondClick = false;
-          _pendingSaveJogoId = null;
-        }
-      });
-    }
-  }
-
-  void _savePalpite(String jogoId, int gole, int gole2) {
-    final palpite = {
-      'id': _palpites[jogoId]?['id'] ?? '${DateTime.now().millisecondsSinceEpoch}',
-      'usuarioId': widget.user['id'],
-      'jogoId': jogoId,
-      'golsTime1': gole,
-      'golsTime2': gole2,
-      'dataCriacao': DateTime.now().toIso8601String(),
-    };
-    
-    DataService.savePalpite(palpite);
-    
-    setState(() {
-      _palpites[jogoId] = palpite;
-    });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Palpite salvo com sucesso!'),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -145,10 +85,7 @@ class _PalpitesTabState extends State<PalpitesTab> {
                 children: [
                   const Text(
                     'Filtrar por fase: ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -162,12 +99,18 @@ class _PalpitesTabState extends State<PalpitesTab> {
                         value: _filtroFase,
                         isExpanded: true,
                         underline: const SizedBox(),
-                        items: _fases.map((fase) => DropdownMenuItem(
-                          value: fase,
-                          child: Text(fase),
-                        )).toList(),
+                        items: _fases
+                            .map(
+                              (fase) => DropdownMenuItem(
+                                value: fase,
+                                child: Text(fase),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (value) {
-                          if (value != null) setState(() => _filtroFase = value);
+                          if (value != null) {
+                            setState(() => _filtroFase = value);
+                          }
                         },
                       ),
                     ),
@@ -175,13 +118,10 @@ class _PalpitesTabState extends State<PalpitesTab> {
                 ],
               ),
             ),
-            
+
             // Divisinha entre filtro e lista
-            Container(
-              height: 1,
-              color: Colors.grey.shade200,
-            ),
-            
+            Container(height: 1, color: Colors.grey.shade200),
+
             // LISTA DE JOGOS
             Expanded(
               child: ListView.builder(
@@ -192,9 +132,9 @@ class _PalpitesTabState extends State<PalpitesTab> {
             ),
           ],
         ),
-        
+
         // TELA DE CARREGAMENTO - Aparece quando usuario clica muitas vezes
-        if (_showProcessingBug)
+        if (showProcessingBug)
           Container(
             color: Colors.black54,
             child: Center(
@@ -206,7 +146,10 @@ class _PalpitesTabState extends State<PalpitesTab> {
                     children: [
                       const CircularProgressIndicator(),
                       const SizedBox(height: 16),
-                      const Text('Aguarde processando...', style: TextStyle(fontSize: 16)),
+                      const Text(
+                        'Aguarde processando...',
+                        style: TextStyle(fontSize: 16),
+                      ),
                     ],
                   ),
                 ),
@@ -220,13 +163,15 @@ class _PalpitesTabState extends State<PalpitesTab> {
   // GAMBIARRA: Metodo que constroi o card de cada jogo
   Widget _buildJogoCard(Map<String, dynamic> jogo) {
     final dataHora = DateTime.parse(jogo['dataHora']);
-    final bloqueado = _jogoBloqueado(jogo);
-    final liberado = _jogoLiberado(jogo['id']);
     final palpite = _palpites[jogo['id']];
     final finalizado = jogo['finalizado'] == true;
-    
-    final gole1Controller = TextEditingController(text: palpite?['golsTime1']?.toString() ?? '');
-    final gole2Controller = TextEditingController(text: palpite?['golsTime2']?.toString() ?? '');
+
+    final gole1Controller = TextEditingController(
+      text: palpite?['golsTime1']?.toString() ?? '',
+    );
+    final gole2Controller = TextEditingController(
+      text: palpite?['golsTime2']?.toString() ?? '',
+    );
 
     // Verifica se e jogo do Brasil ou final (pontos em dobro)
     final ehJogoDobro = jogo['dobroPontos'] == true || jogo['jogoDoBrasil'] == true;
@@ -234,9 +179,7 @@ class _PalpitesTabState extends State<PalpitesTab> {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
         children: [
           // CABECALHO DO CARD - Fase, grupo e data
@@ -244,7 +187,9 @@ class _PalpitesTabState extends State<PalpitesTab> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               color: ehJogoDobro ? Colors.amber.shade100 : Colors.grey.shade100,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -260,10 +205,7 @@ class _PalpitesTabState extends State<PalpitesTab> {
                     ),
                     if (jogo['grupo']?.isNotEmpty == true) ...[
                       const Text(' - ', style: TextStyle(fontSize: 12)),
-                      Text(
-                        jogo['grupo'],
-                        style: const TextStyle(fontSize: 12),
-                      ),
+                      Text(jogo['grupo'], style: const TextStyle(fontSize: 12)),
                     ],
                   ],
                 ),
@@ -272,7 +214,10 @@ class _PalpitesTabState extends State<PalpitesTab> {
                     // Badge de pontos em dobro
                     if (ehJogoDobro)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         margin: const EdgeInsets.only(right: 8),
                         decoration: BoxDecoration(
                           color: Colors.amber,
@@ -305,7 +250,7 @@ class _PalpitesTabState extends State<PalpitesTab> {
               ],
             ),
           ),
-          
+
           // CORPO DO CARD - Times e campos de palpite
           Padding(
             padding: const EdgeInsets.all(16),
@@ -342,9 +287,9 @@ class _PalpitesTabState extends State<PalpitesTab> {
                         ],
                       ),
                     ),
-                    
+
                     // CAMPO DE PALPITE ou PLACAR
-                    if (!finalizado && liberado && !bloqueado)
+                    if (!finalizado && _jogoLiberado(jogo['id']) && !_jogoBloqueado(jogo))
                       Row(
                         children: [
                           // Gols time 1
@@ -362,7 +307,9 @@ class _PalpitesTabState extends State<PalpitesTab> {
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
                                 hintText: '-',
                               ),
                             ),
@@ -393,7 +340,9 @@ class _PalpitesTabState extends State<PalpitesTab> {
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
                                 hintText: '-',
                               ),
                             ),
@@ -403,7 +352,10 @@ class _PalpitesTabState extends State<PalpitesTab> {
                     else if (palpite != null)
                       // Ja tem palpite salvo - mostra o placar
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.red.shade50,
                           borderRadius: BorderRadius.circular(8),
@@ -427,7 +379,7 @@ class _PalpitesTabState extends State<PalpitesTab> {
                           color: Colors.grey,
                         ),
                       ),
-                    
+
                     // Time 2 (direita)
                     Expanded(
                       child: Column(
@@ -457,11 +409,11 @@ class _PalpitesTabState extends State<PalpitesTab> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // MENSAGEM DE STATUS ou BOTAO DE SALVAR
-                if (!liberado)
+                if (!_jogoLiberado(jogo['id']))
                   // Jogo nao liberado - precisa pagar
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -473,7 +425,11 @@ class _PalpitesTabState extends State<PalpitesTab> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.lock, color: Colors.orange.shade700, size: 18),
+                        Icon(
+                          Icons.lock,
+                          color: Colors.orange.shade700,
+                          size: 18,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           'Jogo nao liberado - Pague R\$ 5,00',
@@ -486,7 +442,7 @@ class _PalpitesTabState extends State<PalpitesTab> {
                       ],
                     ),
                   )
-                else if (bloqueado && !finalizado)
+                else if (_jogoBloqueado(jogo) && !finalizado)
                   // Jogo ja comecou - palpites bloqueados
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -498,7 +454,11 @@ class _PalpitesTabState extends State<PalpitesTab> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.timer_off, color: Colors.red.shade700, size: 18),
+                        Icon(
+                          Icons.timer_off,
+                          color: Colors.red.shade700,
+                          size: 18,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           'Palpites bloqueados',
@@ -515,16 +475,38 @@ class _PalpitesTabState extends State<PalpitesTab> {
                   // Jogo liberado - pode fazer palpite
                   ElevatedButton.icon(
                     onPressed: () {
-                      final gole1 = int.tryParse(gole1Controller.text) ?? 0;
-                      final gole2 = int.tryParse(gole2Controller.text) ?? 0;
-                      _handleSaveClick(jogo['id'], gole1, gole2);
+                      final palpite = {
+                        'id': _palpites[jogo['id']]?['id'] ?? '${DateTime.now().millisecondsSinceEpoch}',
+                        'usuarioId': widget.user['id'],
+                        'jogoId': jogo['id'],
+                        'golsTime1': int.tryParse(gole1Controller.text) ?? 0,
+                        'golsTime2': int.tryParse(gole2Controller.text) ?? 0,
+                        'dataCriacao': DateTime.now().toIso8601String(),
+                      };
+
+                      DataService.savePalpite(palpite);
+
+                      setState(() {
+                        _palpites[jogo['id']] = palpite;
+                      });
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Palpite salvo com sucesso!'),
+                          backgroundColor: Colors.green,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
                     },
                     icon: const Icon(Icons.save, size: 18),
                     label: const Text('SALVAR PALPITE'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFCC0000),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),

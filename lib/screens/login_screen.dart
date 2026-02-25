@@ -19,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _diaController = TextEditingController();
   final _mesController = TextEditingController();
   final _anoController = TextEditingController();
-  
+
   // Estados da tela
   bool _isLoading = false;
   String? _errorMessage;
@@ -124,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // CAMPO CPF
                   const Align(
                     alignment: Alignment.centerLeft,
@@ -146,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // CAMPO DATA DE NASCIMENTO
                   const Align(
                     alignment: Alignment.centerLeft,
@@ -168,6 +168,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
                             contentPadding: const EdgeInsets.symmetric(vertical: 14),
                           ),
+                          onChanged: (value) {
+                            if (value.length >= 2) {
+                              // TODO: NEXT FOCUS
+                            }
+                          },
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -208,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
-                  
+
                   // MENSAGEM DE ERRO (so aparece quando tem erro)
                   if (_errorMessage != null) ...[
                     const SizedBox(height: 16),
@@ -223,14 +228,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
                           const SizedBox(width: 8),
-                          Expanded(child: Text(_errorMessage!, style: TextStyle(color: Colors.red.shade700, fontSize: 14))),
+                          Expanded(
+                            child: Text(_errorMessage!, style: TextStyle(color: Colors.red.shade700, fontSize: 14)),
+                          ),
                         ],
                       ),
                     ),
                   ],
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // BOTAO ENTRAR
                   SizedBox(
                     width: double.infinity,
@@ -246,9 +253,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           : const Text('ENTRAR', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // INFORMACOES EXTRAS
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -258,15 +265,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: const Column(
                       children: [
-                        Text('Acesso exclusivo para funcionarios Nikos', style: TextStyle(fontSize: 12, color: Colors.grey), textAlign: TextAlign.center),
+                        Text(
+                          'Acesso exclusivo para funcionarios Nikos',
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          textAlign: TextAlign.center,
+                        ),
                         SizedBox(height: 4),
-                        Text('R\$ 5,00 por jogo ou R\$ 520,00 todos os jogos', style: TextStyle(fontSize: 12, color: Colors.grey), textAlign: TextAlign.center),
+                        Text(
+                          'R\$ 5,00 por jogo ou R\$ 520,00 todos os jogos',
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          textAlign: TextAlign.center,
+                        ),
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // USUARIOS DE TESTE (pra facilitar a vida de quem ta testando)
                   Container(
                     padding: const EdgeInsets.all(8),
@@ -277,7 +292,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: Column(
                       children: [
-                        Text('USUARIOS DE TESTE:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.blue.shade700)),
+                        Text(
+                          'USUARIOS DE TESTE:',
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.blue.shade700),
+                        ),
                         const SizedBox(height: 4),
                         const Text('CPF: 12345678901 | Data: 15/05/1990', style: TextStyle(fontSize: 10)),
                         const Text('Admin: 00000000000 | Data: 01/01/1980', style: TextStyle(fontSize: 10)),
@@ -293,7 +311,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-
   // DISPOSE - limpa os controllers quando sai da tela
   // (importante pra nao dar memory leak)
   @override
@@ -304,4 +321,4 @@ class _LoginScreenState extends State<LoginScreen> {
     _anoController.dispose();
     super.dispose();
   }
-} 
+}
