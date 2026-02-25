@@ -9,21 +9,21 @@ import 'services/auth_service.dart';
 // Inicializa o app
 void main() {
   // isso aqui é pra garantir que initialize tudo antes
-  // não sei bem por que mas o firebase precisa disso
+  // não sei bem por que mas o firebase precisa disso, vou fazer uns testes
   // peguei de um stackoverflow lá
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const BolaoNikosApp());
 }
 
 // App principal
-// TODO: mudar nome pra algo melhor depois
+// TODO: mudar nome pra algo melhor depois, vou botar somente NIKO$
 class BolaoNikosApp extends StatelessWidget {
   const BolaoNikosApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     // Configura o tema do app
-    // Vermelho do time do cara que pediu (Nikos?)
+    // Vermelho do time do cara que pediu (Ramon)
     // Não sei se é vermelho escuro ou claro, vou deixando assim
     return MaterialApp(
       title: "Bolao Nikos", // título que aparece no drawer

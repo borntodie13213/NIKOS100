@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/palpites_tab.dart';
 import '../widgets/ranking_tab.dart';
 import '../widgets/premiacao_tab.dart';
-import '../widgets/regulamento_tab.dart';
+import '../widgets/regulamento_tab.dart' as regulamento;
 import '../widgets/conta_tab.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 PalpitesTab(user: widget.user),
                 RankingTab(user: widget.user),
                 const PremiacaoTab(),
-                const RegulamentoTab(),
+                const regulamento.RegulamentoTab(),
                 ContaTab(user: widget.user, onLogout: widget.onLogout),
               ],
             ),
