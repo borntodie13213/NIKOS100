@@ -5,8 +5,6 @@ import '../widgets/premiacao_tab.dart';
 import '../widgets/regulamento_tab.dart';
 import '../widgets/conta_tab.dart';
 
-// TELA PRINCIPAL DO APP - onde o usuario passa 90% do tempo
-// Tem a barra deabas no topo e o conteudo embaixo
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> user;
   final VoidCallback onLogout;
@@ -18,20 +16,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Aba selecionada no momento (0 = Palpites, 1 = Ranking, etc)
   int _selectedIndex = 0;
-
-  // Titulos das abas (na mesma ordem do IndexedStack)
   final List<String> _tabTitles = ['Palpites', 'Ranking', 'Premiacao', 'Regulamento', 'Conta'];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // BARRA DO TOPO - titulo e botao de sair
       appBar: AppBar(
         title: Row(
           children: [
-            // LOGO BOLAO NIKOS (caixinha branca com texto vermelho)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
@@ -44,18 +37,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              child: const Text(
-                "BOLAO NIKOS",
-                style: TextStyle(color: Color(0xFFCC0000), fontWeight: FontWeight.bold, fontSize: 16),
-              ),
+              child: Image.asset(
+  'assets/logo_nikos.png',
+  width: 40,
+),
             ),
             const Spacer(),
-            // Saudacao com o primeiro nome do usuario
             Text('Ola, ${widget.user['nome']?.split(' ').first ?? 'Usuario'}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
           ],
         ),
         actions: [
-          // Botao de sair (logout)
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: widget.onLogout,
@@ -64,17 +55,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
-      // CORPO DA TELA - abas e conteudo
       body: Column(
         children: [
-          // BARRA DE ABAS - scrollavel horizontalmente
           Container(
             color: Colors.white,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: List.generate(_tabTitles.length, (index) {
-                  // Verifica se essa aba ta selecionada
                   final isSelected = _selectedIndex == index;
                   return InkWell(
                     onTap: () => setState(() => _selectedIndex = index),
@@ -103,15 +91,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // Divisinha entre abas e conteudo
           Container(height: 1, color: Colors.grey.shade200),
 
-          // CONTEUDO DAS ABAS - IndexedStack pra nao recarregar
           Expanded(
             child: IndexedStack(
               index: _selectedIndex,
               children: [
-                // Cada aba é um widget separado
                 PalpitesTab(user: widget.user),
                 RankingTab(user: widget.user),
                 const PremiacaoTab(),
@@ -123,12 +108,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
-      // BARRA DO RODAPE - copyright e tal
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(12),
         color: const Color(0xFFCC0000),
         child: const Text(
-          '2026 Bolao Nikos - Todos os direitos reservados',
+          '2026 NIKO\'\$ - Todos os direitos reservados',
           style: TextStyle(color: Colors.white70, fontSize: 12),
           textAlign: TextAlign.center,
         ),

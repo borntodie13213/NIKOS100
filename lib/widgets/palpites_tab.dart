@@ -62,94 +62,64 @@ class _PalpitesTabState extends State<PalpitesTab> {
     return DateTime.now().isAfter(dataHora.subtract(const Duration(hours: 1)));
   }
 
+ // metodo pra pegar a bandeira
+  Widget _getBandeira(String codigo) {
+    if (codigo.isEmpty) return const Text('?', style: TextStyle(fontSize: 28));
+    return Image.network(
+      'https://flagcdn.com/w80/${codigo.toLowerCase()}.png',
+      width: 50,
+      height: 35,
+      errorBuilder: (_, __, ___) => const Text('?', style: TextStyle(fontSize: 28)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         Column(
           children: [
-            // BARRA DE FILTRO - Selecionar fase do jogo
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade100,
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
+              color: Colors.white,
               child: Row(
                 children: [
-                  const Text(
-                    'Filtrar por fase: ',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                  ),
+                  const Text('Filtrar: ', style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: DropdownButton<String>(
-                        value: _filtroFase,
-                        isExpanded: true,
-                        underline: const SizedBox(),
-                        items: _fases
-                            .map(
-                              (fase) => DropdownMenuItem(
-                                value: fase,
-                                child: Text(fase),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() => _filtroFase = value);
-                          }
-                        },
-                      ),
+                    child: DropdownButton<String>(
+                      value: _filtroFase,
+                      isExpanded: true,
+                      items: _fases.map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
+                      onChanged: (v) => setState(() => _filtroFase = v!),
                     ),
                   ),
                 ],
               ),
             ),
-
-            // Divisinha entre filtro e lista
             Container(height: 1, color: Colors.grey.shade200),
-
-            // LISTA DE JOGOS
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: _jogosFiltrados.length,
-                itemBuilder: (context, index) => _buildJogoCard(_jogosFiltrados[index]),
+                itemBuilder: (ctx, i) => _buildJogoCard(_jogosFiltrados[i]),
               ),
             ),
           ],
         ),
-
-        // TELA DE CARREGAMENTO - Aparece quando usuario clica muitas vezes
         if (showProcessingBug)
           Container(
             color: Colors.black54,
-            child: Center(
+            child: const Center(
               child: Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(32),
+                  padding: EdgeInsets.all(32),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const CircularProgressIndicator(),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Aguarde processando...',
-                        style: TextStyle(fontSize: 16),
-                      ),
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Processando...'),
                     ],
                   ),
                 ),
@@ -160,49 +130,32 @@ class _PalpitesTabState extends State<PalpitesTab> {
     );
   }
 
-  // GAMBIARRA: Metodo que constroi o card de cada jogo
   Widget _buildJogoCard(Map<String, dynamic> jogo) {
     final dataHora = DateTime.parse(jogo['dataHora']);
     final palpite = _palpites[jogo['id']];
-    final finalizado = jogo['finalizado'] == true;
+    final finalized = jogo['finalizado'] == true;
 
-    final gole1Controller = TextEditingController(
-      text: palpite?['golsTime1']?.toString() ?? '',
-    );
-    final gole2Controller = TextEditingController(
-      text: palpite?['golsTime2']?.toString() ?? '',
-    );
+    final gole1Controller = TextEditingController(text: palpite?['golsTime1']?.toString() ?? '');
+    final gole2Controller = TextEditingController(text: palpite?['golsTime2']?.toString() ?? '');
 
-    // Verifica se e jogo do Brasil ou final (pontos em dobro)
     final ehJogoDobro = jogo['dobroPontos'] == true || jogo['jogoDoBrasil'] == true;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
         children: [
-          // CABECALHO DO CARD - Fase, grupo e data
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               color: ehJogoDobro ? Colors.amber.shade100 : Colors.grey.shade100,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
-              ),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
-                    Text(
-                      jogo['fase'],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
+                    Text(jogo['fase'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                     if (jogo['grupo']?.isNotEmpty == true) ...[
                       const Text(' - ', style: TextStyle(fontSize: 12)),
                       Text(jogo['grupo'], style: const TextStyle(fontSize: 12)),
@@ -211,199 +164,74 @@ class _PalpitesTabState extends State<PalpitesTab> {
                 ),
                 Row(
                   children: [
-                    // Badge de pontos em dobro
                     if (ehJogoDobro)
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         margin: const EdgeInsets.only(right: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.amber,
-                          borderRadius: BorderRadius.circular(4),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.amber.shade200,
-                              blurRadius: 4,
-                            ),
-                          ],
-                        ),
-                        child: const Text(
-                          '2X PONTOS',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                        decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(4)),
+                        child: const Text('2X', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white)),
                       ),
-                    Text(
-                      date_utils.formatDate(dataHora),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade700,
-                      ),
-                    ),
+                    Text(date_utils.formatDate(dataHora), style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
                   ],
                 ),
               ],
             ),
           ),
 
-          // CORPO DO CARD - Times e campos de palpite
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // times e placar
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Time 1 (esquerda)
                     Expanded(
                       child: Column(
                         children: [
-                          // Bandeira ou icone do time
-                          Container(
-                            width: 50,
-                            height: 35,
-                            alignment: Alignment.center,
-                            child: Text(
-                              jogo['bandeira1']?.isNotEmpty == true ? jogo['bandeira1'] : '?',
-                              style: const TextStyle(fontSize: 28),
-                            ),
-                          ),
+                          SizedBox(width: 50, height: 35, child: _getBandeira(jogo['bandeira1'])),
                           const SizedBox(height: 4),
-                          Text(
-                            jogo['time1'],
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                          ),
+                          Text(jogo['time1'], style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                         ],
                       ),
                     ),
 
-                    // CAMPO DE PALPITE ou PLACAR
-                    if (!finalizado && _jogoLiberado(jogo['id']) && !_jogoBloqueado(jogo))
+                    if (!finalized && _jogoLiberado(jogo['id']) && !_jogoBloqueado(jogo))
                       Row(
                         children: [
-                          // Gols time 1
                           SizedBox(
                             width: 50,
                             child: TextField(
                               controller: gole1Controller,
                               textAlign: TextAlign.center,
                               keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                                LengthLimitingTextInputFormatter(2),
-                              ],
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
-                                hintText: '-',
-                              ),
+                              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(2)],
+                              decoration: const InputDecoration(border: OutlineInputBorder(), contentPadding: EdgeInsets.symmetric(vertical: 8)),
                             ),
                           ),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: Text(
-                              'X',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                          // Gols time 2
+                          const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text('X', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
                           SizedBox(
                             width: 50,
                             child: TextField(
                               controller: gole2Controller,
                               textAlign: TextAlign.center,
                               keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                                LengthLimitingTextInputFormatter(2),
-                              ],
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
-                                hintText: '-',
-                              ),
+                              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(2)],
+                              decoration: const InputDecoration(border: OutlineInputBorder(), contentPadding: EdgeInsets.symmetric(vertical: 8)),
                             ),
                           ),
                         ],
                       )
                     else if (palpite != null)
-                      // Ja tem palpite salvo - mostra o placar
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '${palpite['golsTime1']} X ${palpite['golsTime2']}',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFFCC0000),
-                          ),
-                        ),
-                      )
+                      Text('${palpite['golsTime1']} X ${palpite['golsTime2']}', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFCC0000)))
                     else
-                      // Ainda nao fez palpite
-                      const Text(
-                        '- X -',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
-                        ),
-                      ),
+                      const Text('- X -', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey)),
 
-                    // Time 2 (direita)
                     Expanded(
                       child: Column(
                         children: [
-                          // Bandeira ou icone do time
-                          Container(
-                            width: 50,
-                            height: 35,
-                            alignment: Alignment.center,
-                            child: Text(
-                              jogo['bandeira2']?.isNotEmpty == true ? jogo['bandeira2'] : '?',
-                              style: const TextStyle(fontSize: 28),
-                            ),
-                          ),
+                          SizedBox(width: 50, height: 35, child: _getBandeira(jogo['bandeira2'])),
                           const SizedBox(height: 4),
-                          Text(
-                            jogo['time2'],
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                          ),
+                          Text(jogo['time2'], style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                         ],
                       ),
                     ),
@@ -412,70 +240,36 @@ class _PalpitesTabState extends State<PalpitesTab> {
 
                 const SizedBox(height: 16),
 
-                // MENSAGEM DE STATUS ou BOTAO DE SALVAR
                 if (!_jogoLiberado(jogo['id']))
-                  // Jogo nao liberado - precisa pagar
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.orange.shade200),
-                    ),
+                    decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(4), border: Border.all(color: Colors.orange.shade200)),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.lock,
-                          color: Colors.orange.shade700,
-                          size: 18,
-                        ),
+                        Icon(Icons.lock, color: Colors.orange.shade700, size: 18),
                         const SizedBox(width: 8),
-                        Text(
-                          'Jogo nao liberado - Pague R\$ 5,00',
-                          style: TextStyle(
-                            color: Colors.orange.shade700,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                        Text('Nao liberado - R\$ 5,00', style: TextStyle(color: Colors.orange.shade700, fontSize: 12)),
                       ],
                     ),
                   )
-                else if (_jogoBloqueado(jogo) && !finalizado)
-                  // Jogo ja comecou - palpites bloqueados
+                else if (_jogoBloqueado(jogo) && !finalized)
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red.shade200),
-                    ),
+                    decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(4), border: Border.all(color: Colors.red.shade200)),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.timer_off,
-                          color: Colors.red.shade700,
-                          size: 18,
-                        ),
+                        Icon(Icons.timer_off, color: Colors.red.shade700, size: 18),
                         const SizedBox(width: 8),
-                        Text(
-                          'Palpites bloqueados',
-                          style: TextStyle(
-                            color: Colors.red.shade700,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                        Text('Bloqueado', style: TextStyle(color: Colors.red.shade700, fontSize: 12)),
                       ],
                     ),
                   )
-                else if (!finalizado)
-                  // Jogo liberado - pode fazer palpite
+                else if (!finalized)
                   ElevatedButton.icon(
                     onPressed: () {
-                      final palpite = {
+                      final palpiteData = {
                         'id': _palpites[jogo['id']]?['id'] ?? '${DateTime.now().millisecondsSinceEpoch}',
                         'usuarioId': widget.user['id'],
                         'jogoId': jogo['id'],
@@ -484,33 +278,16 @@ class _PalpitesTabState extends State<PalpitesTab> {
                         'dataCriacao': DateTime.now().toIso8601String(),
                       };
 
-                      DataService.savePalpite(palpite);
-
-                      setState(() {
-                        _palpites[jogo['id']] = palpite;
-                      });
+                      DataService.savePalpite(palpiteData);
+                      setState(() => _palpites[jogo['id']] = palpiteData);
 
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Palpite salvo com sucesso!'),
-                          backgroundColor: Colors.green,
-                          duration: Duration(seconds: 2),
-                        ),
+                        const SnackBar(content: Text('Salvo!'), backgroundColor: Colors.green),
                       );
                     },
                     icon: const Icon(Icons.save, size: 18),
-                    label: const Text('SALVAR PALPITE'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFCC0000),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
+                    label: const Text('SALVAR'),
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFCC0000)),
                   ),
               ],
             ),
