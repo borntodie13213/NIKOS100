@@ -177,7 +177,7 @@ class _PalpitesTabState extends State<PalpitesTab> {
               ],
             ),
           ),
-
+fiz algumas alterações no codigo que voce fez, mas enfim quero que voce bote uma animação 3D deixe um pouco mais 
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(

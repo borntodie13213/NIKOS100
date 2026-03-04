@@ -38,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               child: Image.asset(
-  'assets/logo_nikos.png',
+  '../assets/logo_nikos.jpg',
   width: 40,
 ),
             ),
