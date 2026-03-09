@@ -4,7 +4,6 @@ import '../services/data_service.dart';
 import '../services/auth_service.dart';
 import '../utils/date_utils.dart' as date_utils;
 
-// Tela de admin
 class AdminScreen extends StatefulWidget {
   final Map<String, dynamic> user;
   final VoidCallback onLogout;
@@ -17,69 +16,156 @@ class AdminScreen extends StatefulWidget {
 
 class _AdminScreenState extends State<AdminScreen> {
   int _selectedTab = 0;
-  final List<String> _tabs = ['Jogos', 'Usuarios', 'Pagamentos', 'Logs'];
+final List<String> _tabs = ['Jogos', 'Usuarios', 'Logs'];
+  final List<IconData> _tabIcons = [
+  Icons.sports_soccer,
+  Icons.people,
+  Icons.history
+];
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 2,
-                  ),
-                ],
-              ),
-              child: const Text(
-                "ADMIN",
-                style: TextStyle(color: Color(0xFFCC0000), fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text('Painel', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-          ],
-        ),
-        actions: [
-          IconButton(icon: const Icon(Icons.logout, color: Colors.white), onPressed: widget.onLogout),
-        ],
-      ),
       body: Column(
         children: [
+          // Header 3D
           Container(
-            color: Colors.white,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF1a1a2e), Color(0xFF16213e)],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFCC0000), Color(0xFF990000)],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.red.withOpacity(0.4),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.admin_panel_settings, color: Colors.white, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            "ADMIN",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Painel de Controle',
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                    const Spacer(),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.logout, color: Colors.white),
+                        onPressed: widget.onLogout,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Tab bar 3D
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade200,
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
             child: Row(
               children: List.generate(_tabs.length, (index) {
                 final isSelected = _selectedTab == index;
                 return Expanded(
-                  child: InkWell(
+                  child: GestureDetector(
                     onTap: () => setState(() => _selectedTab = index),
-                    child: Container(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       decoration: BoxDecoration(
-                        border: Border(bottom: BorderSide(color: isSelected ? const Color(0xFFCC0000) : Colors.transparent, width: isSelected ? 3 : 0)),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: isSelected ? const Color(0xFFCC0000) : Colors.transparent,
+                            width: 3,
+                          ),
+                        ),
+                        color: isSelected ? Colors.red.shade50 : Colors.transparent,
                       ),
-                      child: Text(_tabs[index], textAlign: TextAlign.center, style: TextStyle(color: isSelected ? const Color(0xFFCC0000) : Colors.grey.shade600, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, fontSize: 13)),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _tabIcons[index],
+                            size: 20,
+                            color: isSelected ? const Color(0xFFCC0000) : Colors.grey.shade500,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _tabs[index],
+                            style: TextStyle(
+                              color: isSelected ? const Color(0xFFCC0000) : Colors.grey.shade600,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
               }),
             ),
           ),
-          Container(height: 1, color: Colors.grey.shade200),
+
           Expanded(
             child: IndexedStack(
               index: _selectedTab,
               children: [
                 _JogosTab(adminId: widget.user['id']),
                 const _UsuariosTab(),
-                const _PagamentosTab(),
                 const _LogsTab(),
               ],
             ),
@@ -90,7 +176,6 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 }
 
-// Aba de jogos - admin coloca o resultado
 class _JogosTab extends StatefulWidget {
   final String adminId;
   const _JogosTab({required this.adminId});
@@ -130,7 +215,14 @@ class _JogosTabState extends State<_JogosTab> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('${jogo['time1']} x ${jogo['time2']}'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.edit, color: Color(0xFFCC0000)),
+            const SizedBox(width: 10),
+            Expanded(child: Text('${jogo['time1']} x ${jogo['time2']}', style: const TextStyle(fontSize: 16))),
+          ],
+        ),
         content: Row(
           children: [
             Expanded(
@@ -138,23 +230,43 @@ class _JogosTabState extends State<_JogosTab> {
                 controller: gol1Controller,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: InputDecoration(labelText: jogo['time1'], border: const OutlineInputBorder()),
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                decoration: InputDecoration(
+                  labelText: jogo['time1'],
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
             ),
-            const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('X', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text('X', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            ),
             Expanded(
               child: TextField(
                 controller: gol2Controller,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: InputDecoration(labelText: jogo['time2'], border: const OutlineInputBorder()),
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                decoration: InputDecoration(
+                  labelText: jogo['time2'],
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFCC0000),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
             onPressed: () {
               final gol1 = int.tryParse(gol1Controller.text);
               final gol2 = int.tryParse(gol2Controller.text);
@@ -165,7 +277,20 @@ class _JogosTabState extends State<_JogosTab> {
                 DataService.addLog('RESULTADO', '${jogo['time1']} $gol1 x $gol2 ${jogo['time2']}', widget.adminId);
                 _loadJogos();
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Salvo!'), backgroundColor: Colors.green));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.white),
+                        SizedBox(width: 10),
+                        Text('Resultado salvo!'),
+                      ],
+                    ),
+                    backgroundColor: Colors.green.shade600,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                );
               }
             },
             child: const Text('Salvar'),
@@ -181,17 +306,37 @@ class _JogosTabState extends State<_JogosTab> {
       children: [
         Container(
           padding: const EdgeInsets.all(16),
-          color: Colors.white,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.shade100,
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: Row(
             children: [
-              const Text('Filtrar: ', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(width: 8),
+              const Icon(Icons.filter_list, color: Color(0xFFCC0000)),
+              const SizedBox(width: 12),
+              const Text('Filtrar:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(width: 12),
               Expanded(
-                child: DropdownButton<String>(
-                  value: _filtroFase,
-                  isExpanded: true,
-                  items: _fases.map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
-                  onChanged: (v) => setState(() => _filtroFase = v!),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _filtroFase,
+                      isExpanded: true,
+                      items: _fases.map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
+                      onChanged: (v) => setState(() => _filtroFase = v!),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -204,28 +349,64 @@ class _JogosTabState extends State<_JogosTab> {
             itemBuilder: (context, index) {
               final jogo = _jogosFiltrados[index];
               final dataHora = DateTime.parse(jogo['dataHora']);
+              final finalizado = jogo['finalizado'] == true;
 
-              return Card(
-                margin: const EdgeInsets.only(bottom: 8),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.shade200,
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
                 child: ListTile(
-                  title: Text('${jogo['time1']} x ${jogo['time2']}', style: const TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: Text('${jogo['fase']} - ${date_utils.formatDate(dataHora)}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  title: Text(
+                    '${jogo['time1']} x ${jogo['time2']}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    '${jogo['fase']} - ${date_utils.formatDate(dataHora)}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (jogo['finalizado'] == true)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(color: Colors.green.shade100, borderRadius: BorderRadius.circular(4)),
-                          child: Text('${jogo['golsTime1']} x ${jogo['golsTime2']}', style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold)),
-                        )
-                      else
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(4)),
-                          child: const Text('Pendente', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: finalizado
+                                ? [Colors.green.shade400, Colors.green.shade600]
+                                : [Colors.grey.shade300, Colors.grey.shade400],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                      IconButton(icon: Icon(Icons.edit, color: Colors.grey.shade700), onPressed: () => _editarResultado(jogo)),
+                        child: Text(
+                          finalizado ? '${jogo['golsTime1']} x ${jogo['golsTime2']}' : 'Pendente',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.edit, color: Color(0xFFCC0000)),
+                          onPressed: () => _editarResultado(jogo),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -238,7 +419,6 @@ class _JogosTabState extends State<_JogosTab> {
   }
 }
 
-// Aba de usuarios - lista quem participa
 class _UsuariosTab extends StatelessWidget {
   const _UsuariosTab();
 
@@ -251,23 +431,85 @@ class _UsuariosTab extends StatelessWidget {
       itemCount: users.length,
       itemBuilder: (context, index) {
         final user = users[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
+        final completo = user['todosJogosLiberados'] == true;
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.shade200,
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
           child: ListTile(
-            leading: CircleAvatar(backgroundColor: const Color(0xFFCC0000), child: Text(user['nome'][0], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-            title: Text(user['nome'], style: const TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: Text('CPF: ${user['cpf']} | Pontos: ${user['pontos']}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-            trailing: user['todosJogosLiberados'] == true
-                ? Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(color: Colors.green.shade100, borderRadius: BorderRadius.circular(4)),
-                    child: Text('COMPLETO', style: TextStyle(color: Colors.green.shade700, fontSize: 10, fontWeight: FontWeight.bold)),
-                  )
-                : Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(color: Colors.orange.shade100, borderRadius: BorderRadius.circular(4)),
-                    child: Text('PARCIAL', style: TextStyle(color: Colors.orange.shade700, fontSize: 10, fontWeight: FontWeight.bold)),
+            contentPadding: const EdgeInsets.all(16),
+            leading: Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFCC0000), Color(0xFF990000)],
+                ),
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.red.shade200,
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
                   ),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  user['nome'][0],
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+            ),
+            title: Text(user['nome'], style: const TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 4),
+                Text('CPF: ${user['cpf']}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    const Icon(Icons.stars, size: 14, color: Colors.amber),
+                    const SizedBox(width: 4),
+                    Text('${user['pontos']} pontos', style: const TextStyle(fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ],
+            ),
+            trailing: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: completo
+                      ? [Colors.green.shade400, Colors.green.shade600]
+                      : [Colors.orange.shade400, Colors.orange.shade600],
+                ),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                completo ? 'COMPLETO' : 'PARCIAL',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ),
         );
       },
@@ -275,40 +517,6 @@ class _UsuariosTab extends StatelessWidget {
   }
 }
 
-// Aba de pagamentos -fake ainda
-class _PagamentosTab extends StatelessWidget {
-  const _PagamentosTab();
-
-  @override
-  Widget build(BuildContext context) {
-    final pagamentos = [
-      {'usuario': 'Bernardo Zilli', 'valor': 520.00, 'tipo': 'Todos os jogos', 'data': '15/01/2026'},
-      {'usuario': 'Luis Antonio', 'valor': 520.00, 'tipo': 'Todos os jogos', 'data': '16/01/2026'},
-      {'usuario': 'Ramon Zilli', 'valor': 520.00, 'tipo': 'Todos os jogos', 'data': '17/01/2026'},
-      {'usuario': 'Carlos Silva', 'valor': 25.00, 'tipo': '5 jogos', 'data': '18/01/2026'},
-      {'usuario': 'Maria Santos', 'valor': 520.00, 'tipo': 'Todos os jogos', 'data': '19/01/2026'},
-    ];
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: pagamentos.length,
-      itemBuilder: (context, index) {
-        final pag = pagamentos[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: CircleAvatar(backgroundColor: Colors.green.shade100, child: Icon(Icons.attach_money, color: Colors.green.shade700)),
-            title: Text(pag['usuario'] as String, style: const TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: Text('${pag['tipo']} - ${pag['data']}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-            trailing: Text('R\$ ${(pag['valor'] as double).toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green.shade700)),
-          ),
-        );
-      },
-    );
-  }
-}
-
-// Aba de logs -oque o admin fez
 class _LogsTab extends StatelessWidget {
   const _LogsTab();
 
@@ -317,11 +525,30 @@ class _LogsTab extends StatelessWidget {
     final logs = DataService.getLogs();
 
     if (logs.isEmpty) {
-      return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Icon(Icons.history, size: 64, color: Colors.grey.shade300),
-        const SizedBox(height: 16),
-        Text('Nenhum log', style: TextStyle(color: Colors.grey.shade600)),
-      ]));
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.history, size: 64, color: Colors.grey.shade400),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Nenhum log registrado',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     return ListView.builder(
@@ -331,13 +558,35 @@ class _LogsTab extends StatelessWidget {
         final log = logs[index];
         final timestamp = DateTime.parse(log['timestamp']);
 
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.shade200,
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
           child: ListTile(
-            leading: CircleAvatar(backgroundColor: Colors.blue.shade100, child: Icon(Icons.history, color: Colors.blue.shade700)),
-            title: Text(log['action'], style: const TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: Text(log['details'], style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-            trailing: Text(date_utils.formatDateFull(timestamp), style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
+            contentPadding: const EdgeInsets.all(16),
+            leading: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(Icons.history, color: Colors.blue.shade600),
+            ),
+            title: Text(log['action'], style: const TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Text(log['details'], style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+            trailing: Text(
+              date_utils.formatDateFull(timestamp),
+              style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
+            ),
           ),
         );
       },

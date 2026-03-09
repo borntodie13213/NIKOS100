@@ -6,23 +6,25 @@ import 'services/auth_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const BolaoNikosApp());
+  runApp(const NikosApp());
 }
 
-class BolaoNikosApp extends StatelessWidget {
-  const BolaoNikosApp({super.key});
+class NikosApp extends StatelessWidget {
+  const NikosApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Bolao Nikos",
+      title: "NIKO'\$",
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: const Color(0xFFCC0000),
-        scaffoldBackgroundColor: const Color(0xFFF5F5F5),
+        scaffoldBackgroundColor: const Color(0xFFF8F9FA),
+        fontFamily: 'Arial',
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFCC0000),
           primary: const Color(0xFFCC0000),
+          secondary: const Color(0xFFFFD700),
         ),
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFFCC0000),
@@ -33,7 +35,14 @@ class BolaoNikosApp extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFCC0000),
             foregroundColor: Colors.white,
+            elevation: 4,
+            shadowColor: Colors.red.shade200,
           ),
+        ),
+        cardTheme: CardThemeData(
+          elevation: 8,
+          shadowColor: Colors.black.withOpacity(0.15),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       ),
       home: const AuthWrapper(),

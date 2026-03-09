@@ -15,74 +15,169 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _selectedIndex = 0;
-  final List<String> _tabTitles = ['Palpites', 'Ranking', 'Premiacao', 'Regulamento', 'Conta'];
+  final List<String> _tabTitles = ['Palpites', 'Ranking', 'Premios', 'Regras', 'Conta'];
+  final List<IconData> _tabIcons = [
+    Icons.sports_soccer,
+    Icons.leaderboard,
+    Icons.emoji_events,
+    Icons.menu_book,
+    Icons.person,
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 2,
-                  ),
-                ],
-              ),
-              child: Image.asset(
-  '../assets/logo_nikos.jpg',
-  width: 40,
-),
-            ),
-            const Spacer(),
-            Text('Ola, ${widget.user['nome']?.split(' ').first ?? 'Usuario'}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: widget.onLogout,
-            tooltip: 'Sair',
-          ),
-        ],
-      ),
-
       body: Column(
         children: [
+          // Header customizado com efeito 3D
           Container(
-            color: Colors.white,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFCC0000), Color(0xFF990000)],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.red.shade300,
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
+                child: Row(
+                  children: [
+                    // Logo 3D
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Text(
+                        "NIKO'\$",
+                        style: TextStyle(
+                          color: Color(0xFFCC0000),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 18,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    // Usuario info
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.person, color: Colors.white, size: 18),
+                          const SizedBox(width: 6),
+                          Text(
+                            widget.user['nome']?.split(' ').first ?? 'Usuario',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Botao logout
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.logout, color: Colors.white, size: 22),
+                        onPressed: widget.onLogout,
+                        tooltip: 'Sair',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Tab bar com efeito 3D
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade200,
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               child: Row(
                 children: List.generate(_tabTitles.length, (index) {
                   final isSelected = _selectedIndex == index;
-                  return InkWell(
+                  return GestureDetector(
                     onTap: () => setState(() => _selectedIndex = index),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: isSelected ? const Color(0xFFCC0000) : Colors.transparent,
-                            width: isSelected ? 3 : 0,
-                          ),
-                        ),
+                        gradient: isSelected
+                            ? const LinearGradient(
+                                colors: [Color(0xFFCC0000), Color(0xFF990000)],
+                              )
+                            : null,
+                        color: isSelected ? null : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: Colors.red.shade200,
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ]
+                            : null,
                       ),
-                      child: Text(
-                        _tabTitles[index],
-                        style: TextStyle(
-                          color: isSelected ? const Color(0xFFCC0000) : Colors.grey.shade600,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          fontSize: 14,
-                        ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _tabIcons[index],
+                            size: 18,
+                            color: isSelected ? Colors.white : Colors.grey.shade600,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            _tabTitles[index],
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : Colors.grey.shade700,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -91,8 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          Container(height: 1, color: Colors.grey.shade200),
-
+          // Conteudo
           Expanded(
             child: IndexedStack(
               index: _selectedIndex,
@@ -107,14 +201,36 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-
+      
+      // Footer elegante
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(12),
-        color: const Color(0xFFCC0000),
-        child: const Text(
-          '2026 NIKO\'\$ - Todos os direitos reservados',
-          style: TextStyle(color: Colors.white70, fontSize: 12),
-          textAlign: TextAlign.center,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFCC0000), Color(0xFF990000)],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.red.shade300,
+              blurRadius: 10,
+              offset: const Offset(0, -3),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.copyright, color: Colors.white.withOpacity(0.7), size: 14),
+            const SizedBox(width: 6),
+            Text(
+              "2026 NIKO'\$ - Todos os direitos reservados",
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );

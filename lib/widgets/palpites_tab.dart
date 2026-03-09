@@ -12,7 +12,7 @@ class PalpitesTab extends StatefulWidget {
   State<PalpitesTab> createState() => _PalpitesTabState();
 }
 
-class _PalpitesTabState extends State<PalpitesTab> {
+class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> _jogos = [];
   Map<String, Map<String, dynamic>> _palpites = {};
   String _filtroFase = 'Todos';
@@ -62,14 +62,47 @@ class _PalpitesTabState extends State<PalpitesTab> {
     return DateTime.now().isAfter(dataHora.subtract(const Duration(hours: 1)));
   }
 
- // metodo pra pegar a bandeira
   Widget _getBandeira(String codigo) {
-    if (codigo.isEmpty) return const Text('?', style: TextStyle(fontSize: 28));
-    return Image.network(
-      'https://flagcdn.com/w80/${codigo.toLowerCase()}.png',
-      width: 50,
-      height: 35,
-      errorBuilder: (_, __, ___) => const Text('?', style: TextStyle(fontSize: 28)),
+    if (codigo.isEmpty) {
+      return Container(
+        width: 50,
+        height: 35,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Icon(Icons.flag, color: Colors.grey, size: 20),
+      );
+    }
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: Image.network(
+          'https://flagcdn.com/w80/${codigo.toLowerCase()}.png',
+          width: 50,
+          height: 35,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(
+            width: 50,
+            height: 35,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Icon(Icons.flag, color: Colors.grey, size: 20),
+          ),
+        ),
+      ),
     );
   }
 
@@ -79,25 +112,57 @@ class _PalpitesTabState extends State<PalpitesTab> {
       children: [
         Column(
           children: [
+            // Filtro com design 3D
             Container(
               padding: const EdgeInsets.all(16),
-              color: Colors.white,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade200,
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
               child: Row(
                 children: [
-                  const Text('Filtrar: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFCC0000), Color(0xFF990000)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.filter_list, color: Colors.white, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text('Filtrar:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: DropdownButton<String>(
-                      value: _filtroFase,
-                      isExpanded: true,
-                      items: _fases.map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
-                      onChanged: (v) => setState(() => _filtroFase = v!),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _filtroFase,
+                          isExpanded: true,
+                          items: _fases.map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
+                          onChanged: (v) => setState(() => _filtroFase = v!),
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            Container(height: 1, color: Colors.grey.shade200),
+
+            // Lista de jogos
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
@@ -107,21 +172,32 @@ class _PalpitesTabState extends State<PalpitesTab> {
             ),
           ],
         ),
+
+        // Bug do processing
         if (showProcessingBug)
           Container(
             color: Colors.black54,
-            child: const Center(
-              child: Card(
-                child: Padding(
-                  padding: EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text('Processando...'),
-                    ],
-                  ),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.all(40),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(color: Color(0xFFCC0000)),
+                    SizedBox(height: 20),
+                    Text('Processando...', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
                 ),
               ),
             ),
@@ -134,28 +210,59 @@ class _PalpitesTabState extends State<PalpitesTab> {
     final dataHora = DateTime.parse(jogo['dataHora']);
     final palpite = _palpites[jogo['id']];
     final finalized = jogo['finalizado'] == true;
+    final liberado = _jogoLiberado(jogo['id']);
+    final bloqueado = _jogoBloqueado(jogo);
 
-    final gole1Controller = TextEditingController(text: palpite?['golsTime1']?.toString() ?? '');
-    final gole2Controller = TextEditingController(text: palpite?['golsTime2']?.toString() ?? '');
+    final gol1Controller = TextEditingController(text: palpite?['golsTime1']?.toString() ?? '');
+    final gol2Controller = TextEditingController(text: palpite?['golsTime2']?.toString() ?? '');
 
     final ehJogoDobro = jogo['dobroPontos'] == true || jogo['jogoDoBrasil'] == true;
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: ehJogoDobro ? Colors.amber.shade200 : Colors.grey.shade200,
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
       child: Column(
         children: [
+          // Header do card
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: ehJogoDobro ? Colors.amber.shade100 : Colors.grey.shade100,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+              gradient: LinearGradient(
+                colors: ehJogoDobro
+                    ? [Colors.amber.shade100, Colors.amber.shade200]
+                    : [Colors.grey.shade100, Colors.grey.shade200],
+              ),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
-                    Text(jogo['fase'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    Icon(
+                      Icons.sports_soccer,
+                      size: 16,
+                      color: ehJogoDobro ? Colors.amber.shade700 : Colors.grey.shade600,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      jogo['fase'],
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: ehJogoDobro ? Colors.amber.shade800 : Colors.grey.shade700,
+                      ),
+                    ),
                     if (jogo['grupo']?.isNotEmpty == true) ...[
                       const Text(' - ', style: TextStyle(fontSize: 12)),
                       Text(jogo['grupo'], style: const TextStyle(fontSize: 12)),
@@ -166,130 +273,305 @@ class _PalpitesTabState extends State<PalpitesTab> {
                   children: [
                     if (ehJogoDobro)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         margin: const EdgeInsets.only(right: 8),
-                        decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(4)),
-                        child: const Text('2X', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white)),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFFD700), Color(0xFFFFAA00)],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.amber.shade300,
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.star, size: 12, color: Colors.white),
+                            SizedBox(width: 4),
+                            Text(
+                              '2X',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    Text(date_utils.formatDate(dataHora), style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.schedule, size: 12, color: Colors.grey),
+                          const SizedBox(width: 4),
+                          Text(
+                            date_utils.formatDate(dataHora),
+                            style: const TextStyle(fontSize: 11, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ],
             ),
           ),
-fiz algumas alterações no codigo que voce fez, mas enfim quero que voce bote uma animação 3D deixe um pouco mais 
+
+          // Conteudo do card
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             child: Column(
               children: [
+                // Times e placar
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // Time 1
                     Expanded(
                       child: Column(
                         children: [
-                          SizedBox(width: 50, height: 35, child: _getBandeira(jogo['bandeira1'])),
-                          const SizedBox(height: 4),
-                          Text(jogo['time1'], style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                          _getBandeira(jogo['bandeira1']),
+                          const SizedBox(height: 8),
+                          Text(
+                            jogo['time1'],
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            textAlign: TextAlign.center,
+                          ),
                         ],
                       ),
                     ),
 
-                    if (!finalized && _jogoLiberado(jogo['id']) && !_jogoBloqueado(jogo))
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: 50,
-                            child: TextField(
-                              controller: gole1Controller,
-                              textAlign: TextAlign.center,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(2)],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), contentPadding: EdgeInsets.symmetric(vertical: 8)),
-                            ),
-                          ),
-                          const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text('X', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
-                          SizedBox(
-                            width: 50,
-                            child: TextField(
-                              controller: gole2Controller,
-                              textAlign: TextAlign.center,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(2)],
-                              decoration: const InputDecoration(border: OutlineInputBorder(), contentPadding: EdgeInsets.symmetric(vertical: 8)),
-                            ),
-                          ),
-                        ],
-                      )
-                    else if (palpite != null)
-                      Text('${palpite['golsTime1']} X ${palpite['golsTime2']}', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFCC0000)))
-                    else
-                      const Text('- X -', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    // Placar / Input
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: !finalized && liberado && !bloqueado
+                          ? Row(
+                              children: [
+                                _buildScoreInput(gol1Controller),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 12),
+                                  child: Text(
+                                    'X',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                _buildScoreInput(gol2Controller),
+                              ],
+                            )
+                          : palpite != null
+                              ? Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFFCC0000), Color(0xFF990000)],
+                                    ),
+                                    borderRadius: BorderRadius.circular(15),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.red.shade200,
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Text(
+                                    '${palpite['golsTime1']} X ${palpite['golsTime2']}',
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade200,
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: const Text(
+                                    '- X -',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                    ),
 
+                    // Time 2
                     Expanded(
                       child: Column(
                         children: [
-                          SizedBox(width: 50, height: 35, child: _getBandeira(jogo['bandeira2'])),
-                          const SizedBox(height: 4),
-                          Text(jogo['time2'], style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                          _getBandeira(jogo['bandeira2']),
+                          const SizedBox(height: 8),
+                          Text(
+                            jogo['time2'],
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            textAlign: TextAlign.center,
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-                if (!_jogoLiberado(jogo['id']))
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(4), border: Border.all(color: Colors.orange.shade200)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.lock, color: Colors.orange.shade700, size: 18),
-                        const SizedBox(width: 8),
-                        Text('Nao liberado - R\$ 5,00', style: TextStyle(color: Colors.orange.shade700, fontSize: 12)),
-                      ],
-                    ),
+                // Status / Botao
+                if (!liberado)
+                  _buildStatusContainer(
+                    icon: Icons.lock,
+                    text: 'Nao liberado - R\$ 5,00',
+                    color: Colors.orange,
                   )
-                else if (_jogoBloqueado(jogo) && !finalized)
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(4), border: Border.all(color: Colors.red.shade200)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.timer_off, color: Colors.red.shade700, size: 18),
-                        const SizedBox(width: 8),
-                        Text('Bloqueado', style: TextStyle(color: Colors.red.shade700, fontSize: 12)),
-                      ],
-                    ),
+                else if (bloqueado && !finalized)
+                  _buildStatusContainer(
+                    icon: Icons.timer_off,
+                    text: 'Palpites bloqueados',
+                    color: Colors.red,
                   )
                 else if (!finalized)
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      final palpiteData = {
-                        'id': _palpites[jogo['id']]?['id'] ?? '${DateTime.now().millisecondsSinceEpoch}',
-                        'usuarioId': widget.user['id'],
-                        'jogoId': jogo['id'],
-                        'golsTime1': int.tryParse(gole1Controller.text) ?? 0,
-                        'golsTime2': int.tryParse(gole2Controller.text) ?? 0,
-                        'dataCriacao': DateTime.now().toIso8601String(),
-                      };
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final palpiteData = {
+                          'id': _palpites[jogo['id']]?['id'] ?? '${DateTime.now().millisecondsSinceEpoch}',
+                          'usuarioId': widget.user['id'],
+                          'jogoId': jogo['id'],
+                          'golsTime1': int.tryParse(gol1Controller.text) ?? 0,
+                          'golsTime2': int.tryParse(gol2Controller.text) ?? 0,
+                          'dataCriacao': DateTime.now().toIso8601String(),
+                        };
 
-                      DataService.savePalpite(palpiteData);
-                      setState(() => _palpites[jogo['id']] = palpiteData);
+                        DataService.savePalpite(palpiteData);
+                        setState(() => _palpites[jogo['id']] = palpiteData);
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Salvo!'), backgroundColor: Colors.green),
-                      );
-                    },
-                    icon: const Icon(Icons.save, size: 18),
-                    label: const Text('SALVAR'),
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFCC0000)),
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Row(
+                              children: [
+                                Icon(Icons.check_circle, color: Colors.white),
+                                SizedBox(width: 10),
+                                Text('Palpite salvo!'),
+                              ],
+                            ),
+                            backgroundColor: Colors.green.shade600,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFCC0000),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        elevation: 8,
+                        shadowColor: Colors.red.shade300,
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.save, size: 20),
+                          SizedBox(width: 10),
+                          Text(
+                            'SALVAR PALPITE',
+                            style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScoreInput(TextEditingController controller) {
+    return Container(
+      width: 55,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade300,
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        textAlign: TextAlign.center,
+        keyboardType: TextInputType.number,
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+          LengthLimitingTextInputFormatter(2),
+        ],
+        style: const TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFFCC0000),
+        ),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFFCC0000), width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusContainer({
+    required IconData icon,
+    required String text,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 10),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
             ),
           ),
         ],

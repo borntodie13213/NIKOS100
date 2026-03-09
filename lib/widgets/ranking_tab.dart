@@ -10,16 +10,28 @@ class RankingTab extends StatefulWidget {
   State<RankingTab> createState() => _RankingTabState();
 }
 
-class _RankingTabState extends State<RankingTab> {
+class _RankingTabState extends State<RankingTab> with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> _ranking = [];
   DateTime? _lastUpdate;
   int _userPosition = 0;
   int _userPontos = 0;
 
+  late AnimationController _animController;
+
   @override
   void initState() {
     super.initState();
+    _animController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
     _loadRanking();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
   }
 
   void _loadRanking({bool force = false}) {
@@ -41,27 +53,29 @@ class _RankingTabState extends State<RankingTab> {
       _userPontos = pontos;
       _lastUpdate = DateTime.now();
     });
+
+    _animController.forward(from: 0);
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // CABECALHO - Mostra a posicao do usuario com gradiente vermelho
+        // Header 3D com posicao do usuario
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(28),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFFCC0000), Color(0xFF990000)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
+              colors: [Color(0xFFCC0000), Color(0xFF8B0000), Color(0xFF660000)],
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.red.shade200,
-                blurRadius: 8,
-                offset: const Offset(0, 4),
+                color: Colors.red.shade300,
+                blurRadius: 20,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
@@ -72,38 +86,54 @@ class _RankingTabState extends State<RankingTab> {
                 style: TextStyle(
                   color: Colors.white70,
                   fontSize: 12,
-                  letterSpacing: 2,
-                  fontWeight: FontWeight.w500,
+                  letterSpacing: 3,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Numero da posicao (destaque branco)
+                  // Posicao com efeito 3D
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 15,
+                          offset: const Offset(0, 8),
+                        ),
+                        const BoxShadow(
+                          color: Colors.white,
+                          blurRadius: 0,
+                          offset: Offset(0, -2),
                         ),
                       ],
                     ),
-                    child: Text(
-                      _userPosition > 0 ? '${_userPosition}o' : '-',
-                      style: const TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFCC0000),
-                      ),
+                    child: Column(
+                      children: [
+                        Text(
+                          _userPosition > 0 ? '${_userPosition}º' : '-',
+                          style: const TextStyle(
+                            fontSize: 42,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFFCC0000),
+                          ),
+                        ),
+                        Text(
+                          'lugar',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 24),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -111,17 +141,37 @@ class _RankingTabState extends State<RankingTab> {
                         widget.user['nome'] ?? 'Usuario',
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 18,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '$_userPontos pontos',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.85),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.amber,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.amber.shade300,
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.stars, color: Colors.white, size: 18),
+                            const SizedBox(width: 6),
+                            Text(
+                              '$_userPontos pts',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -132,22 +182,31 @@ class _RankingTabState extends State<RankingTab> {
           ),
         ),
 
-        // BARRA DE ATUALIZACAO - Aviso que atualiza a cada 5 minutos
+        // Info de atualizacao
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: Colors.amber.shade50,
+            gradient: LinearGradient(
+              colors: [Colors.amber.shade50, Colors.amber.shade100],
+            ),
             border: Border(
               bottom: BorderSide(color: Colors.amber.shade200),
             ),
           ),
           child: Row(
             children: [
-              Icon(Icons.info_outline, color: Colors.amber.shade700, size: 20),
-              const SizedBox(width: 10),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade200,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.info_outline, color: Colors.amber.shade800, size: 18),
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'O ranking atualiza a cada 5 minutos. Ultima: ${_lastUpdate != null ? "${_lastUpdate!.hour.toString().padLeft(2, '0')}:${_lastUpdate!.minute.toString().padLeft(2, '0')}" : "-"}',
+                  'Atualiza a cada 5 min. Ultima: ${_lastUpdate != null ? "${_lastUpdate!.hour.toString().padLeft(2, '0')}:${_lastUpdate!.minute.toString().padLeft(2, '0')}" : "-"}',
                   style: TextStyle(
                     color: Colors.amber.shade800,
                     fontSize: 13,
@@ -155,29 +214,43 @@ class _RankingTabState extends State<RankingTab> {
                   ),
                 ),
               ),
-              ElevatedButton(
+              ElevatedButton.icon(
                 onPressed: () => _loadRanking(force: true),
+                icon: const Icon(Icons.refresh, size: 16),
+                label: const Text('Atualizar'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber.shade700,
+                  backgroundColor: Colors.amber.shade600,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  elevation: 4,
+                  shadowColor: Colors.amber.shade300,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                child: const Text('Atualizar'),
               ),
             ],
           ),
         ),
 
-        // TITULO DO RANKING
+        // Titulo
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
           child: Row(
-            children: const [
-              Text(
-                'RANKING DOS MELHORES COLOCADOS',
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFCC0000), Color(0xFF990000)],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.leaderboard, color: Colors.white, size: 18),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'TOP 5 COLOCADOS',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -189,16 +262,31 @@ class _RankingTabState extends State<RankingTab> {
           ),
         ),
 
-        // LISTA DO RANKING - Top 20
+        // Lista do ranking
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _ranking.length > 20 ? 20 : _ranking.length,
+            itemCount: _ranking.length > 5 ? 5 : _ranking.length,
             itemBuilder: (context, index) {
               final item = _ranking[index];
               final isCurrentUser = item['userId'] == widget.user['id'];
 
-              return _buildRankingItem(item, isCurrentUser);
+              return AnimatedBuilder(
+                animation: _animController,
+                builder: (context, child) {
+                  return Transform.translate(
+                    offset: Offset(
+                      0,
+                      (1 - _animController.value) * 20 * (index + 1).clamp(0, 5),
+                    ),
+                    child: Opacity(
+                      opacity: _animController.value,
+                      child: child,
+                    ),
+                  );
+                },
+                child: _buildRankingItem(item, isCurrentUser),
+              );
             },
           ),
         ),
@@ -206,154 +294,154 @@ class _RankingTabState extends State<RankingTab> {
     );
   }
 
-  // GAMBIARRA: Metodo que constroi cada item da lista
-  // Feito de madrugada mas funciona que uma beleza
   Widget _buildRankingItem(Map<String, dynamic> item, bool isCurrentUser) {
+    final posicao = item['posicao'] as int;
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isCurrentUser ? const Color(0xFFCC0000).withAlpha(30) : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isCurrentUser ? const Color(0xFFCC0000) : Colors.grey.shade200,
-          width: isCurrentUser ? 2 : 1,
-        ),
+        gradient: isCurrentUser
+            ? const LinearGradient(
+                colors: [Color(0xFFCC0000), Color(0xFF990000)],
+              )
+            : null,
+        color: isCurrentUser ? null : Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade100,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: isCurrentUser ? Colors.red.shade300 : Colors.grey.shade200,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Row(
-        children: [
-          // Numero da posicao com cor diferente para top 3
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: _getPosicaoColor(item['posicao']),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 2,
-                  offset: const Offset(0, 1),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            // Posicao
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: _getPosicaoGradient(posicao, isCurrentUser),
                 ),
-              ],
-            ),
-            child: Center(
-              child: Text(
-                '${item['posicao']}',
-                style: TextStyle(
-                  color: item['posicao'] <= 3 ? Colors.white : Colors.black87,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: _getPosicaoColor(posicao).withOpacity(0.4),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  '$posicao',
+                  style: TextStyle(
+                    color: posicao <= 3 || isCurrentUser ? Colors.white : Colors.black87,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 16),
+            const SizedBox(width: 16),
 
-          // Nome do usuario
-          Expanded(
-            child: Text(
-              item['nome'],
-              style: TextStyle(
-                fontWeight: isCurrentUser ? FontWeight.bold : FontWeight.w500,
-                fontSize: 16,
-                color: isCurrentUser ? const Color(0xFFCC0000) : Colors.black87,
+            // Nome
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item['nome'],
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: isCurrentUser ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${item['pontos']} pts',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isCurrentUser ? Colors.white70 : Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-
-          // Medalha para top 3
-          _buildMedalha(item['posicao']),
-        ],
+            // Medalha para top 3
+            _buildMedalha(posicao, isCurrentUser),
+          ],
+        ),
       ),
     );
   }
 
-  // GAMBIARRA: Metodo que constroi a medalinha do top 3
-  Widget _buildMedalha(int posicao) {
-    if (posicao == 1) {
-      return Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.amber,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.amber.shade200,
-              blurRadius: 8,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: const Icon(
-          Icons.emoji_events,
-          color: Colors.white,
-          size: 24,
-        ),
-      );
-    } else if (posicao == 2) {
-      return Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade400,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.shade300,
-              blurRadius: 8,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: const Icon(
-          Icons.emoji_events,
-          color: Colors.white,
-          size: 24,
-        ),
-      );
-    } else if (posicao == 3) {
-      return Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.brown.shade400,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.brown.shade200,
-              blurRadius: 8,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: const Icon(
-          Icons.emoji_events,
-          color: Colors.white,
-          size: 24,
-        ),
-      );
-    }
+  Widget _buildMedalha(int posicao, bool isCurrentUser) {
+    if (posicao > 3) return const SizedBox.shrink();
 
-    return const SizedBox.shrink();
+    final colors = {
+      1: [Colors.amber, Colors.amber.shade700],
+      2: [Colors.grey.shade400, Colors.grey.shade600],
+      3: [Colors.brown.shade400, Colors.brown.shade600],
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: colors[posicao]!,
+        ),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: colors[posicao]![0].withOpacity(0.5),
+            blurRadius: 10,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: const Icon(
+        Icons.emoji_events,
+        color: Colors.white,
+        size: 22,
+      ),
+    );
   }
 
-  // CORES DAS POSICOES - Top 3 tem cores especiais
+  List<Color> _getPosicaoGradient(int posicao, bool isCurrentUser) {
+    if (isCurrentUser) {
+      return [Colors.white.withOpacity(0.3), Colors.white.withOpacity(0.1)];
+    }
+    switch (posicao) {
+      case 1:
+        return [Colors.amber.shade300, Colors.orange.shade700];
+      case 2:
+        return [Colors.grey.shade400, Colors.grey.shade600];
+      case 3:
+        return [Colors.brown.shade400, Colors.brown.shade600];
+      default:
+        return [Colors.grey.shade200, Colors.grey.shade300];
+    }
+  }
+
   Color _getPosicaoColor(int posicao) {
     switch (posicao) {
       case 1:
         return Colors.amber;
       case 2:
-        return Colors.grey.shade400;
+        return Colors.grey;
       case 3:
-        return Colors.brown.shade400;
+        return Colors.brown;
       default:
-        return Colors.grey.shade200;
+        return Colors.grey.shade400;
     }
   }
 }
