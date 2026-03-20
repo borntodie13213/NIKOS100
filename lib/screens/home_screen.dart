@@ -15,7 +15,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final List<String> _tabTitles = ['Palpites', 'Ranking', 'Premios', 'Regras', 'Conta'];
   final List<IconData> _tabIcons = [
@@ -90,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           const Icon(Icons.person, color: Colors.white, size: 18),
                           const SizedBox(width: 6),
                           Text(
-                            widget.user['nome']?.split(' ').first ?? 'Usuario',
+                            (widget.user['nome'] ?? 'Usuario').split(' ').first,
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -201,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ],
       ),
-      
+
       // Footer elegante
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),

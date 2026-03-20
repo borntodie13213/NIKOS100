@@ -82,7 +82,7 @@ class _PremiacaoTabState extends State<PremiacaoTab> with SingleTickerProviderSt
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  'PREMIACAO',
+                  'PREMIAÇÃO',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 32,

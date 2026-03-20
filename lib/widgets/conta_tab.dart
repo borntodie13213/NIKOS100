@@ -98,33 +98,32 @@ class ContaTab extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           SizedBox(
-  width: double.infinity,
-  child: ElevatedButton.icon(
-    icon: const Icon(Icons.sports_soccer),
-    label: const Text(
-      "VER MEUS PALPITES",
-      style: TextStyle(fontWeight: FontWeight.bold),
-    ),
-    style: ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFFCC0000),
-      foregroundColor: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-    ),
-    onPressed: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => MeusPalpitesScreen(user: user),
-        ),
-      );
-    },
-  ),
-),
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.sports_soccer),
+              label: const Text(
+                "VER MEUS PALPITES",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFCC0000),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => MeusPalpitesScreen(user: user),
+                  ),
+                );
+              },
+            ),
+          ),
           const SizedBox(height: 24),
-
 
           // Estatisticas
           Row(
@@ -195,16 +194,12 @@ class ContaTab extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: user['todosJogosLiberados'] == true
-                            ? Colors.green.shade50
-                            : Colors.orange.shade50,
+                        color: user['todosJogosLiberados'] == true ? Colors.green.shade50 : Colors.orange.shade50,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         user['todosJogosLiberados'] == true ? Icons.verified : Icons.warning,
-                        color: user['todosJogosLiberados'] == true
-                            ? Colors.green.shade600
-                            : Colors.orange.shade600,
+                        color: user['todosJogosLiberados'] == true ? Colors.green.shade600 : Colors.orange.shade600,
                         size: 24,
                       ),
                     ),
@@ -223,15 +218,11 @@ class ContaTab extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          user['todosJogosLiberados'] == true
-                              ? 'Inscricao Completa'
-                              : 'Inscricao Parcial',
+                          user['todosJogosLiberados'] == true ? 'Inscricao Completa' : 'Inscricao Parcial',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color: user['todosJogosLiberados'] == true
-                                ? Colors.green.shade700
-                                : Colors.orange.shade700,
+                            color: user['todosJogosLiberados'] == true ? Colors.green.shade700 : Colors.orange.shade700,
                           ),
                         ),
                       ],
@@ -251,9 +242,7 @@ class ContaTab extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          user['todosJogosLiberados'] == true
-                              ? 'Voce tem acesso a todos os 104 jogos'
-                              : 'Voce tem acesso apenas aos jogos pagos',
+                          user['todosJogosLiberados'] == true ? 'Voce tem acesso a todos os 104 jogos' : 'Voce tem acesso apenas aos jogos pagos',
                           style: TextStyle(
                             color: Colors.grey.shade700,
                             fontSize: 13,
@@ -429,16 +418,15 @@ class ContaTab extends StatelessWidget {
   }
 }
 
-    class MeusPalpitesScreen extends StatelessWidget {
-    final Map<String, dynamic> user;
+// esta com um bug de palpite ver isso com eles essa duvida. deixa em stand by para resolver depois
+class MeusPalpitesScreen extends StatelessWidget {
+  final Map<String, dynamic> user;
 
-    const MeusPalpitesScreen({super.key, required this.user});
+  const MeusPalpitesScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
-    final palpites = DataService.getPalpites()
-        .where((p) => p['usuarioId'] == user['id'])
-        .toList();
+    final palpites = DataService.getPalpites().where((p) => p['usuarioId'] == user['id']).toList();
 
     final jogos = DataService.getJogos();
 
@@ -447,96 +435,96 @@ class ContaTab extends StatelessWidget {
         title: const Text("Meus Palpites"),
         backgroundColor: const Color(0xFFCC0000),
       ),
-body: ListView.builder(
-  padding: const EdgeInsets.all(16),
-  itemCount: palpites.length,
-  itemBuilder: (context, index) {
-    final palpite = palpites[index];
-    final jogo = jogos.firstWhere(
-      (j) => j['id'] == palpite['jogoId'],
-      orElse: () => {},
-    );
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: palpites.length,
+        itemBuilder: (context, index) {
+          final palpite = palpites[index];
+          final jogo = jogos.firstWhere(
+            (j) => j['id'] == palpite['jogoId'],
+            orElse: () => {},
+          );
 
-      final gol1 = palpite['gol1'] ?? 0;
-      final gol2 = palpite['gol2'] ?? 0;
+          final gol1 = palpite['gol1'] ?? 0;
+          final gol2 = palpite['gol2'] ?? 0;
 
-    final temPalpite = gol1 != 0 && gol2 != 0;
-    final jogoFinalizado = jogo['finalizado'] == true;
+          final temPalpite = gol1 != 0 && gol2 != 0;
+          final jogoFinalizado = jogo['finalizado'] == true;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade200,
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "${jogo['time1']} x ${jogo['time2']}",
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade200,
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
-          ),
-
-          const SizedBox(height: 10),
-
-          /// PALPITE DO USUARIO
-          if (temPalpite) ...[
-            Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.sports_soccer, size: 18),
-                const SizedBox(width: 6),
                 Text(
-                  "Seu palpite: $gol1 x $gol2",
+                  "${jogo['time1']} x ${jogo['time2']}",
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
-              ],
-            ),
-          ] else if (!jogoFinalizado) ...[
-            const Row(
-              children: [
-                Icon(Icons.hourglass_empty, size: 18),
-                SizedBox(width: 6),
-                Text(
-                  "Você ainda não fez palpite",
-                  style: TextStyle(
-                    fontStyle: FontStyle.italic,
-                    color: Colors.grey,
+
+                const SizedBox(height: 10),
+
+                /// PALPITE DO USUARIO
+                if (temPalpite) ...[
+                  Row(
+                    children: [
+                      const Icon(Icons.sports_soccer, size: 18),
+                      const SizedBox(width: 6),
+                      Text(
+                        "Seu palpite: $gol1 x $gol2",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-          ] else ...[
-            const Row(
-              children: [
-                Icon(Icons.hourglass_empty, size: 18),
-                SizedBox(width: 6),
-                Text(
-                  "Sem palpite ainda",
-                  style: TextStyle(
-                    fontStyle: FontStyle.italic,
-                    color: Colors.grey,
+                ] else if (!jogoFinalizado) ...[
+                  const Row(
+                    children: [
+                      Icon(Icons.hourglass_empty, size: 18),
+                      SizedBox(width: 6),
+                      Text(
+                        "Você ainda não fez palpite",
+                        style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                ] else ...[
+                  const Row(
+                    children: [
+                      Icon(Icons.hourglass_empty, size: 18),
+                      SizedBox(width: 6),
+                      Text(
+                        "Sem palpite ainda",
+                        style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
-          ],
-        ],
-      ),
-    );
-  },
+          );
+        },
       ),
     );
   }

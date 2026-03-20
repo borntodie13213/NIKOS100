@@ -16,7 +16,6 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
   List<Map<String, dynamic>> _jogos = [];
   Map<String, Map<String, dynamic>> _palpites = {};
   String _filtroFase = 'Todos';
-  bool showProcessingBug = false;
 
   @override
   void initState() {
@@ -174,34 +173,33 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
         ),
 
         // Bug do processing
-        if (showProcessingBug)
-          Container(
-            color: Colors.black54,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.all(40),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: const Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(color: Color(0xFFCC0000)),
-                    SizedBox(height: 20),
-                    Text('Processando...', style: TextStyle(fontWeight: FontWeight.bold)),
-                  ],
-                ),
+        Container(
+          color: Colors.black54,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(40),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(color: Color(0xFFCC0000)),
+                  SizedBox(height: 20),
+                  Text('Processando...', style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
               ),
             ),
           ),
+        ),
       ],
     );
   }
@@ -238,9 +236,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: ehJogoDobro
-                    ? [Colors.amber.shade100, Colors.amber.shade200]
-                    : [Colors.grey.shade100, Colors.grey.shade200],
+                colors: ehJogoDobro ? [Colors.amber.shade100, Colors.amber.shade200] : [Colors.grey.shade100, Colors.grey.shade200],
               ),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
@@ -371,45 +367,45 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                               ],
                             )
                           : palpite != null
-                              ? Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [Color(0xFFCC0000), Color(0xFF990000)],
-                                    ),
-                                    borderRadius: BorderRadius.circular(15),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.red.shade200,
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Text(
-                                    '${palpite['golsTime1']} X ${palpite['golsTime2']}',
-                                    style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                )
-                              : Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade200,
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: const Text(
-                                    '- X -',
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
+                          ? Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFFCC0000), Color(0xFF990000)],
                                 ),
+                                borderRadius: BorderRadius.circular(15),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.red.shade200,
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                '${palpite['golsTime1']} X ${palpite['golsTime2']}',
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            )
+                          : Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: const Text(
+                                '- X -',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
                     ),
 
                     // Time 2

@@ -17,6 +17,10 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   final _mesController = TextEditingController();
   final _anoController = TextEditingController();
 
+  final _diaFocus = FocusNode();
+  final _mesFocus = FocusNode();
+  final _anoFocus = FocusNode();
+
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -31,13 +35,13 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    
+
     // Animacao do logo - pulsa suavemente
     _logoController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat(reverse: true);
-    
+
     _logoScale = Tween<double>(begin: 1.0, end: 1.05).animate(
       CurvedAnimation(parent: _logoController, curve: Curves.easeInOut),
     );
@@ -47,11 +51,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _formSlide = Tween<double>(begin: 50, end: 0).animate(
       CurvedAnimation(parent: _formController, curve: Curves.easeOutCubic),
     );
-    
+
     _formController.forward();
 
     // Animacao flutuante para elementos de fundo
@@ -59,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       duration: const Duration(seconds: 4),
       vsync: this,
     )..repeat(reverse: true);
-    
+
     _floatingAnimation = Tween<double>(begin: -10, end: 10).animate(
       CurvedAnimation(parent: _floatingController, curve: Curves.easeInOut),
     );
@@ -74,6 +78,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     _diaController.dispose();
     _mesController.dispose();
     _anoController.dispose();
+
+    _diaFocus.dispose();
+    _mesFocus.dispose();
+    _anoFocus.dispose();
+
     super.dispose();
   }
 
@@ -104,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       return;
     }
 
-    final dataNascimento = '$ano-$mes-$dia';
+    final dataNascimento = "$ano-$mes-$dia";
     final user = AuthService.login(cpf, dataNascimento);
 
     if (user != null) {
@@ -136,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               ),
             ),
           ),
-          
+
           // Elementos 3D flutuantes
           AnimatedBuilder(
             animation: _floatingAnimation,
@@ -176,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               );
             },
           ),
-          
+
           // Conteudo principal
           SafeArea(
             child: Center(
@@ -270,7 +279,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                               ],
                             ),
                           ),
-                          
+
                           // Formulario
                           Padding(
                             padding: const EdgeInsets.all(32),
@@ -285,7 +294,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                   icon: Icons.person_outline,
                                 ),
                                 const SizedBox(height: 24),
-                                
+
                                 _buildLabel('Data de Nascimento'),
                                 const SizedBox(height: 8),
                                 Row(
@@ -303,7 +312,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                     Expanded(flex: 3, child: _buildDateField(_anoController, 'AAAA', maxLength: 4)),
                                   ],
                                 ),
-                                
+
                                 if (_errorMessage != null) ...[
                                   const SizedBox(height: 20),
                                   Container(
@@ -329,9 +338,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                     ),
                                   ),
                                 ],
-                                
+
                                 const SizedBox(height: 32),
-                                
+
                                 // Botao de login com efeito 3D
                                 SizedBox(
                                   width: double.infinity,
@@ -373,9 +382,9 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                           ),
                                   ),
                                 ),
-                                
+
                                 const SizedBox(height: 24),
-                                
+
                                 // Info box
                                 Container(
                                   padding: const EdgeInsets.all(16),
@@ -483,6 +492,16 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   }
 
   Widget _buildDateField(TextEditingController controller, String hint, {int maxLength = 2}) {
+    FocusNode? focus;
+
+    if (controller == _diaController) {
+      focus = _diaFocus;
+    } else if (controller == _mesController) {
+      focus = _mesFocus;
+    } else if (controller == _anoController) {
+      focus = _anoFocus;
+    }
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -496,12 +515,20 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       ),
       child: TextField(
         controller: controller,
+        focusNode: focus,
         keyboardType: TextInputType.number,
         inputFormatters: [
           FilteringTextInputFormatter.digitsOnly,
           LengthLimitingTextInputFormatter(maxLength),
         ],
         textAlign: TextAlign.center,
+        onChanged: (value) {
+          if (controller == _diaController && value.length == 2) {
+            FocusScope.of(context).requestFocus(_mesFocus);
+          } else if (controller == _mesController && value.length == 2) {
+            FocusScope.of(context).requestFocus(_anoFocus);
+          }
+        },
         decoration: InputDecoration(
           hintText: hint,
           filled: true,
@@ -531,7 +558,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(
-          // ignore: deprecated_member_use
           colors: [color.withOpacity(0.8), color.withOpacity(0.2)],
           center: const Alignment(-0.3, -0.3),
         ),
