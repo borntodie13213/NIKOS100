@@ -7,8 +7,14 @@ import '../utils/date_utils.dart' as date_utils;
 class AdminScreen extends StatefulWidget {
   final Map<String, dynamic> user;
   final VoidCallback onLogout;
+  final String adminId;  // ✅ CORRIGIDO: agora é uma propriedade
 
-  const AdminScreen({super.key, required this.user, required this.onLogout});
+  const AdminScreen({
+    super.key, 
+    required this.user, 
+    required this.onLogout, 
+    required this.adminId,  // ✅ CORRIGIDO: agora está correto
+  });
 
   @override
   State<AdminScreen> createState() => _AdminScreenState();
@@ -37,7 +43,7 @@ class _AdminScreenState extends State<AdminScreen> {
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(width: 12),
-                  const Text('Painel', style: TextStyle(color: Colors.white70)),
+                  Text('Olá, ${widget.user['nome']}', style: const TextStyle(color: Colors.white70)),
                   const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.logout, color: Colors.white),
@@ -95,7 +101,7 @@ class _AdminScreenState extends State<AdminScreen> {
             child: IndexedStack(
               index: _selectedTab,
               children: [
-                _JogosTab(adminId: widget.user['id']),
+                _JogosTab(adminId: widget.adminId),  // ✅ Agora usa widget.adminId
                 const _UsuariosTab(),
                 const _LogsTab(),
               ],
@@ -122,27 +128,23 @@ class _JogosTabState extends State<_JogosTab> {
   @override
   void initState() {
     super.initState();
-    _loadJogos(); // Carrega jogos na inicialização
+    _loadJogos();
   }
 
-  // Recarrega lista de jogos
   void _loadJogos() {
     setState(() => _jogos = DataService.getJogos());
   }
 
-  // Filtra jogos por fase
   List<Map<String, dynamic>> get _jogosFiltrados {
     if (_filtroFase == 'Todos') return _jogos;
     return _jogos.where((j) => j['fase'] == _filtroFase).toList();
   }
 
-  // Pega todas as fases únicas
   List<String> get _fases {
     final fases = _jogos.map((j) => j['fase'] as String).toSet().toList();
     return ['Todos', ...fases];
   }
 
-  // Dialog pra editar resultado do jogo
   void _editarResultado(Map<String, dynamic> jogo) {
     final gol1Controller = TextEditingController(text: jogo['golsTime1']?.toString() ?? '');
     final gol2Controller = TextEditingController(text: jogo['golsTime2']?.toString() ?? '');
@@ -197,7 +199,6 @@ class _JogosTabState extends State<_JogosTab> {
               final gol2 = int.tryParse(gol2Controller.text);
 
               if (gol1 != null && gol2 != null) {
-                // Salva resultado e log
                 final updatedJogo = {...jogo, 'golsTime1': gol1, 'golsTime2': gol2, 'finalizado': true};
                 DataService.updateJogo(updatedJogo);
                 DataService.addLog('RESULTADO', '${jogo['time1']} $gol1 x $gol2 ${jogo['time2']}', widget.adminId);
@@ -219,7 +220,6 @@ class _JogosTabState extends State<_JogosTab> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Filtro por fase
         Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -242,7 +242,6 @@ class _JogosTabState extends State<_JogosTab> {
             ],
           ),
         ),
-        // Lista de jogos
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -289,7 +288,6 @@ class _JogosTabState extends State<_JogosTab> {
   }
 }
 
-// Lista todos os usuarios cadastrados
 class _UsuariosTab extends StatelessWidget {
   const _UsuariosTab();
 
@@ -346,7 +344,6 @@ class _UsuariosTab extends StatelessWidget {
   }
 }
 
-// Mostra histórico de ações
 class _LogsTab extends StatelessWidget {
   const _LogsTab();
 

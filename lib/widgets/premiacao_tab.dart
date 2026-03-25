@@ -33,7 +33,7 @@ class _PremiacaoTabState extends State<PremiacaoTab> with SingleTickerProviderSt
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Header 3D com trofeu animado
+          // Header com trofeu animado
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(32),

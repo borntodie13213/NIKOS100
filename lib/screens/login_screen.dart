@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/auth_service.dart';
+import 'admin_login_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final Function(Map<String, dynamic>) onLogin;
@@ -86,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     super.dispose();
   }
 
-  void _login() {
+  void _login() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -114,9 +115,14 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     }
 
     final dataNascimento = "$ano-$mes-$dia";
+
     final user = AuthService.login(cpf, dataNascimento);
 
     if (user != null) {
+      setState(() {
+        _isLoading = false; 
+      });
+
       widget.onLogin(user);
     } else {
       setState(() {
@@ -416,6 +422,47 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                                         ),
                                       ),
                                     ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // 🔒 BOTÃO SECRETO ADMIN
+                                GestureDetector(
+                                  onLongPress: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const AdminLoginScreen(),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.grey.shade300),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.admin_panel_settings,
+                                          color: Colors.grey.shade500,
+                                          size: 18,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Configurações avançadas',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey.shade600,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ],

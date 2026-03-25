@@ -16,7 +16,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
   List<Map<String, dynamic>> _jogos = [];
   Map<String, Map<String, dynamic>> _palpites = {};
   String _filtroFase = 'Todos';
-
+  bool _loading = true;
   @override
   void initState() {
     super.initState();
@@ -37,6 +37,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
     setState(() {
       _jogos = jogos;
       _palpites = userPalpites;
+      _loading = false; // 👈 ESSENCIAL
     });
   }
 
@@ -173,33 +174,34 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
         ),
 
         // Bug do processing
-        Container(
-          color: Colors.black54,
-          child: Center(
-            child: Container(
-              padding: const EdgeInsets.all(40),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: const Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(color: Color(0xFFCC0000)),
-                  SizedBox(height: 20),
-                  Text('Processando...', style: TextStyle(fontWeight: FontWeight.bold)),
-                ],
+        if (_loading)
+          Container(
+            color: Colors.black54,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.all(40),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(color: Color(0xFFCC0000)),
+                    SizedBox(height: 20),
+                    Text('Processando...', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
       ],
     );
   }

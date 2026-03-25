@@ -66,13 +66,13 @@ class _AuthWrapperState extends State<AuthWrapper> {
     }
 
     // ADMIN
-if (_currentUser!['isAdmin'] == true) {
-  return AdminScreen(
-    user: _currentUser!,
-    onLogout: _onLogout,
-  );
-}
-
+    if (_currentUser!['isAdmin'] == true) {
+      return AdminScreen(
+        user: _currentUser!,
+        onLogout: _onLogout,
+        adminId: _currentUser!['id'] ?? "admin_default",
+      );
+    }
     // USUÁRIO NORMAL
     return HomeScreen(
       user: _currentUser!,
