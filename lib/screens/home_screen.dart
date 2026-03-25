@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:nikos/utils/micro_server_post.dart';
 import '../widgets/palpites_tab.dart';
 import '../widgets/ranking_tab.dart';
 import '../widgets/premiacao_tab.dart';
@@ -113,6 +115,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         tooltip: 'Sair',
                       ),
                     ),
+                    if (kDebugMode)
+                      IconButton(
+                        icon: const Icon(Icons.telegram, color: Colors.white, size: 22),
+                        onPressed: () async {
+                          final resp = await serverPost(
+                            "login_simple",
+                            myJson: {
+                              "nomusu": "??",
+                              "password": "??",
+                            },
+                          );
+                          print(resp);
+                        },
+                      ),
                   ],
                 ),
               ),

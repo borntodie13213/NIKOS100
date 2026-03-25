@@ -486,11 +486,11 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.save, size: 20),
+                          Icon(Icons.save, size: 20, color: Colors.white),
                           SizedBox(width: 10),
                           Text(
                             'SALVAR PALPITE',
-                            style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
+                            style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.white),
                           ),
                         ],
                       ),

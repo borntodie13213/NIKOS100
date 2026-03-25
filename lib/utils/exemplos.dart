@@ -3,6 +3,18 @@
 ////! Idealmente marcar um dia pra ir no escritorio antes de implementar para tirar duvidas etc
 
 /*
+
+onPressed: () async {
+  final resp = await serverPost(
+    "login_simple",
+    myJson: {
+      "nomusu": "??",
+      "password": "??",
+    },
+  );
+  print(resp);
+},
+
 letraBtn(
     letra: "T",
     cor: Colors.brown,
@@ -50,8 +62,8 @@ letraBtn(
         "datjog": "31/12/2026 20:30",
         "timeaa": "Time A",
         "siglaa": "TMA",
-        "siglbb": "TMB",
         "timebb": "Time B",
+        "siglbb": "TMB",
         "plcraa": "1", // Ou valor (sempre como string) ex: "2"
         "plcrbb": "1", // Ou valor (sempre como string) ex: "2"
         },
@@ -83,7 +95,7 @@ letraBtn(
         },
     );
     print(resp);
-    // {"Response":"[{\"cgccpf\":\"80000000006\",\"pontos\":14.0,\"posicao\":1.0},{\"cgccpf\":\"80000000012\",\"pontos\":14.0,\"posicao\":2.0},{\"cgccpf\":\"80000000018\",\"pontos\":14.0,\"posicao\":3.0},{\"cgccpf\":\"05764104971\",\"pontos\":13.0,\"posicao\":4.0},{\"cgccpf\":\"04687894992\",\"pontos\":11.0,\"posicao\":5.0},{\"cgccpf\":\"80000000003\",\"pontos\":10.0,\"posicao\":6.0},{\"cgccpf\":\"80000000009\",\"pontos\":10.0,\"posicao\":7.0},{\"cgccpf\":\"80000000010\",\"pontos\":10.0,\"posicao\":8.0},{\"cgccpf\":\"80000000015\",\"pontos\":10.0,\"posicao\":9.0},{\"cgccpf\":\"80000000004\",\"pontos\":9.0,\"posicao\":10.0},{\"cgccpf\":\"80000000016\",\"pontos\":9.0,\"posicao\":11.0},{\"cgccpf\":\"07197793912\",\"pontos\":8.0,\"posicao\":12.0},{\"cgccpf\":\"80000000002\",\"pontos\":8.0,\"posicao\":13.0},{\"cgccpf\":\"80000000008\",\"pontos\":8.0,\"posicao\":14.0},{\"cgccpf\":\"80000000014\",\"pontos\":8.0,\"posicao\":15.0},{\"cgccpf\":\"46972978904\",\"pontos\":7.0,\"posicao\":16.0},{\"cgccpf\":\"80000000001\",\"pontos\":7.0,\"posicao\":17.0},{\"cgccpf\":\"80000000013\",\"pontos\":7.0,\"posicao\":18.0},{\"cgccpf\":\"80000000020\",\"pontos\":7.0,\"posicao\":19.0},{\"cgccpf\":\"80000000005\",\"pontos\":6.0,\"posicao\":20.0}]"}
+    // {"Response":"[{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":14.0,\"posicao\":1.0},{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":14.0,\"posicao\":2.0},{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":14.0,\"posicao\":3.0},{\"nomcli\":\"RAMON MACALOSSI ZILLI\",\"pontos\":13.0,\"posicao\":4.0},{\"nomcli\":\"LUIS ANTONIO VINHOLI\",\"pontos\":11.0,\"posicao\":5.0},{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":10.0,\"posicao\":6.0},{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":10.0,\"posicao\":7.0},{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":10.0,\"posicao\":8.0},{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":10.0,\"posicao\":9.0},{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":9.0,\"posicao\":10.0},{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":9.0,\"posicao\":11.0},{\"nomcli\":\"BERNARDO ZILLI\",\"pontos\":8.0,\"posicao\":12.0},{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":8.0,\"posicao\":13.0},{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":8.0,\"posicao\":14.0},{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":8.0,\"posicao\":15.0},{\"nomcli\":\"TADEU VALENTIN ZILLI\",\"pontos\":7.0,\"posicao\":16.0},{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":7.0,\"posicao\":17.0},{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":7.0,\"posicao\":18.0},{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":7.0,\"posicao\":19.0},{\"nomcli\":\"Cpf nao cadastrado\",\"pontos\":6.0,\"posicao\":20.0}]"}
     // obs: se o cpf enviado tiver alguma pontuacao, ele ira aparecer no rank juntamente com 1 acima e 1 abaixo dele, msm q nao esteja no top 20
     },
 ),
