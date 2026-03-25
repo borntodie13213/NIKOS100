@@ -1,8 +1,13 @@
 
+/*
 ////! Aqui estao todos os endpoints e o q deve ser mandando, e o q recebe (em casos q tem algo para receber)
 ////! Idealmente marcar um dia pra ir no escritorio antes de implementar para tirar duvidas etc
 
-/*
+
+////! Apagar Tab Conta
+////! baseado no q volta do bolao_get_jogos criar a listview corretamente, jogos q ja tem placar de finido coloca ao lado dos textfield
+////! Texfield de palpite/botao sallvar palpite so pode ser editado se o a data do jogo for igual ou posterior a amanha
+////! Baseado no q volta do login max_palpites, bloquei na front quantos paliptes  a pessoa pode fazer, se ela ja tem algo editado, ela pode editar de novo (respeitando a regra de cima)
 
 onPressed: () async {
   final resp = await serverPost(
