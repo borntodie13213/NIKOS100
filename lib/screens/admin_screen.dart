@@ -7,13 +7,13 @@ import '../utils/date_utils.dart' as date_utils;
 class AdminScreen extends StatefulWidget {
   final Map<String, dynamic> user;
   final VoidCallback onLogout;
-  final String adminId; 
+  final String adminId;
 
   const AdminScreen({
-    super.key, 
-    required this.user, 
-    required this.onLogout, 
-    required this.adminId,  
+    super.key,
+    required this.user,
+    required this.onLogout,
+    required this.adminId,
   });
 
   @override
@@ -101,7 +101,7 @@ class _AdminScreenState extends State<AdminScreen> {
             child: IndexedStack(
               index: _selectedTab,
               children: [
-                _JogosTab(adminId: widget.adminId),  // ✅ Agora usa widget.adminId
+                _JogosTab(adminId: widget.adminId), // ✅ Agora usa widget.adminId
                 const _UsuariosTab(),
                 const _LogsTab(),
               ],
@@ -193,7 +193,7 @@ class _JogosTabState extends State<_JogosTab> {
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFCC0000)),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFCC0000), foregroundColor: Colors.white),
             onPressed: () {
               final gol1 = int.tryParse(gol1Controller.text);
               final gol2 = int.tryParse(gol2Controller.text);

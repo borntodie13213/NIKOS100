@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:nikos/utils/micro_server_post.dart';
 import 'admin_screen.dart';
 
 class AdminLoginScreen extends StatefulWidget {
@@ -12,8 +15,18 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   final _userController = TextEditingController();
   final _passController = TextEditingController();
 
-  void _login() {
-    if (_userController.text == "admin" && _passController.text == "1234") {
+  Future<void> _login() async {
+    final resp = await serverPost(
+      "login_simple",
+      myJson: {
+        "nomusu": _userController.text,
+        "password": _passController.text,
+      },
+    );
+    var decodedResponse = jsonDecode(resp);
+    var responseData = jsonDecode(decodedResponse['Response'])[0];
+
+    if (responseData["admin"] == "S") {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -79,6 +92,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFCC0000),
                   padding: const EdgeInsets.symmetric(vertical: 14),
+                  foregroundColor: Colors.white,
                 ),
                 child: const Text("Entrar"),
               ),
