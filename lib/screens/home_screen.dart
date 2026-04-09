@@ -5,7 +5,6 @@ import '../widgets/palpites_tab.dart';
 import '../widgets/ranking_tab.dart';
 import '../widgets/premiacao_tab.dart';
 import '../widgets/regulamento_tab.dart';
-import '../widgets/conta_tab.dart';
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -19,13 +18,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  final List<String> _tabTitles = ['Palpites', 'Ranking', 'Premios', 'Regras', 'Conta'];
+  // Removido "Conta" conforme solicitado
+  final List<String> _tabTitles = ['Palpites', 'Ranking', 'Premios', 'Regras'];
   final List<IconData> _tabIcons = [
     Icons.sports_soccer,
     Icons.leaderboard,
     Icons.emoji_events,
     Icons.menu_book,
-    Icons.person,
   ];
 
   @override
@@ -211,7 +210,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 RankingTab(user: widget.user),
                 const PremiacaoTab(),
                 const RegulamentoTab(),
-                ContaTab(user: widget.user, onLogout: widget.onLogout),
               ],
             ),
           ),

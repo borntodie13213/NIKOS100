@@ -7,13 +7,13 @@ import '../utils/date_utils.dart' as date_utils;
 class AdminScreen extends StatefulWidget {
   final Map<String, dynamic> user;
   final VoidCallback onLogout;
-  final String adminId;  // ✅ CORRIGIDO: agora é uma propriedade
+  final String adminId; 
 
   const AdminScreen({
     super.key, 
     required this.user, 
     required this.onLogout, 
-    required this.adminId,  // ✅ CORRIGIDO: agora está correto
+    required this.adminId,  
   });
 
   @override

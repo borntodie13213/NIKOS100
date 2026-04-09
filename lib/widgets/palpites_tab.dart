@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../services/data_service.dart';
-import '../utils/date_utils.dart' as date_utils;
+import '../services/api_service.dart';
+import '../services/user_session.dart';
 
 class PalpitesTab extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -14,56 +14,47 @@ class PalpitesTab extends StatefulWidget {
 
 class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> _jogos = [];
-  Map<String, Map<String, dynamic>> _palpites = {};
-  String _filtroFase = 'Todos';
+  Map<int, Map<String, dynamic>> _palpitesLocais = {}; // Armazena palpites já feitos localmente
   bool _loading = true;
+  
   @override
   void initState() {
     super.initState();
     _loadData();
   }
 
-  void _loadData() {
-    final jogos = DataService.getJogos();
-    final palpites = DataService.getPalpites();
-
-    final userPalpites = <String, Map<String, dynamic>>{};
-    for (var p in palpites) {
-      if (p['usuarioId'] == widget.user['id']) {
-        userPalpites[p['jogoId']] = p;
-      }
-    }
-
+  Future<void> _loadData() async {
+    setState(() => _loading = true);
+    
+    final jogos = await ApiService.getJogos();
+    
     setState(() {
       _jogos = jogos;
-      _palpites = userPalpites;
-      _loading = false; // 👈 ESSENCIAL
+      _loading = false;
     });
   }
 
-  List<Map<String, dynamic>> get _jogosFiltrados {
-    if (_filtroFase == 'Todos') return _jogos;
-    return _jogos.where((j) => j['fase'] == _filtroFase).toList();
+  // Converte sigla para código de bandeira
+  String _getSiglaParaBandeira(String sigla) {
+    final Map<String, String> siglaParaCodigo = {
+      'QAT': 'qa', 'ECU': 'ec', 'ENG': 'gb-eng', 'IRN': 'ir',
+      'ARG': 'ar', 'KSA': 'sa', 'GER': 'de', 'JPN': 'jp',
+      'BRA': 'br', 'SRB': 'rs', 'POR': 'pt', 'GHA': 'gh',
+      'FRA': 'fr', 'DEN': 'dk', 'ESP': 'es', 'CRO': 'hr',
+      'NED': 'nl', 'USA': 'us', 'MAR': 'ma', 'BEL': 'be',
+      'MEX': 'mx', 'CAN': 'ca', 'ITA': 'it', 'URU': 'uy',
+      'COL': 'co', 'CHI': 'cl', 'PER': 'pe', 'KOR': 'kr',
+      'AUS': 'au', 'NZL': 'nz', 'NGA': 'ng', 'SEN': 'sn',
+      'UAE': 'ae', 'POL': 'pl', 'SUI': 'ch', 'SWE': 'se',
+      'NOR': 'no', 'FIN': 'fi', 'ISL': 'is', 'TUR': 'tr',
+      'GRE': 'gr', 'CZE': 'cz', 'HUN': 'hu', 'SCO': 'gb-sct',
+      'IRL': 'ie', 'WAL': 'gb-wls', 'UKR': 'ua', 'CRC': 'cr',
+    };
+    return siglaParaCodigo[sigla.toUpperCase()] ?? sigla.toLowerCase();
   }
 
-  List<String> get _fases {
-    final fases = _jogos.map((j) => j['fase'] as String).toSet().toList();
-    return ['Todos', ...fases];
-  }
-
-  bool _jogoLiberado(String jogoId) {
-    if (widget.user['todosJogosLiberados'] == true) return true;
-    final liberados = widget.user['jogosLiberados'] as List? ?? [];
-    return liberados.contains(jogoId);
-  }
-
-  bool _jogoBloqueado(Map<String, dynamic> jogo) {
-    final dataHora = DateTime.parse(jogo['dataHora']);
-    return DateTime.now().isAfter(dataHora.subtract(const Duration(hours: 1)));
-  }
-
-  Widget _getBandeira(String codigo) {
-    if (codigo.isEmpty) {
+  Widget _getBandeira(String sigla) {
+    if (sigla.isEmpty) {
       return Container(
         width: 50,
         height: 35,
@@ -74,6 +65,9 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
         child: const Icon(Icons.flag, color: Colors.grey, size: 20),
       );
     }
+    
+    final codigo = _getSiglaParaBandeira(sigla);
+    
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),
@@ -88,7 +82,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6),
         child: Image.network(
-          'https://flagcdn.com/w80/${codigo.toLowerCase()}.png',
+          'https://flagcdn.com/w80/$codigo.png',
           width: 50,
           height: 35,
           fit: BoxFit.cover,
@@ -99,11 +93,60 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
               color: Colors.grey.shade200,
               borderRadius: BorderRadius.circular(6),
             ),
-            child: const Icon(Icons.flag, color: Colors.grey, size: 20),
+            child: Center(
+              child: Text(
+                sigla,
+                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+              ),
+            ),
           ),
         ),
       ),
     );
+  }
+
+  // Verifica se o jogo pode receber palpite (data >= amanhã)
+  bool _podeEditarPalpite(String datjog) {
+    try {
+      // Formato: "2026-11-20 13:00:00"
+      final partes = datjog.split(' ');
+      final dataPartes = partes[0].split('-');
+      final horaPartes = partes[1].split(':');
+      
+      final dataJogo = DateTime(
+        int.parse(dataPartes[0]),
+        int.parse(dataPartes[1]),
+        int.parse(dataPartes[2]),
+        int.parse(horaPartes[0]),
+        int.parse(horaPartes[1]),
+      );
+      
+      final agora = DateTime.now();
+      final amanha = DateTime(agora.year, agora.month, agora.day + 1);
+      
+      return dataJogo.isAfter(amanha) || dataJogo.isAtSameMomentAs(amanha);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Formata data para exibição
+  String _formatarData(String datjog) {
+    try {
+      final partes = datjog.split(' ');
+      final dataPartes = partes[0].split('-');
+      final hora = partes[1].substring(0, 5);
+      return '${dataPartes[2]}/${dataPartes[1]} $hora';
+    } catch (e) {
+      return datjog;
+    }
+  }
+
+  // Verifica se é jogo do Brasil (pontos em dobro)
+  bool _ehJogoDoBrasil(Map<String, dynamic> jogo) {
+    final siglaa = (jogo['siglaa'] ?? '').toString().toUpperCase();
+    final siglbb = (jogo['siglbb'] ?? '').toString().toUpperCase();
+    return siglaa == 'BRA' || siglbb == 'BRA';
   }
 
   @override
@@ -112,50 +155,33 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
       children: [
         Column(
           children: [
-            // Filtro com design 3D
+            // Info de palpites restantes
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.shade200,
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                gradient: LinearGradient(
+                  colors: [Colors.amber.shade100, Colors.amber.shade200],
+                ),
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFCC0000), Color(0xFF990000)],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(Icons.filter_list, color: Colors.white, size: 20),
+                  const Icon(Icons.sports_soccer, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Palpites: ${UserSession.palpitesFeitos}/${UserSession.maxPalpites ?? 0}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(width: 12),
-                  const Text('Filtrar:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: _filtroFase,
-                          isExpanded: true,
-                          items: _fases.map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
-                          onChanged: (v) => setState(() => _filtroFase = v!),
-                        ),
-                      ),
+                  const SizedBox(width: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${_jogos.length} jogos',
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                 ],
@@ -164,16 +190,19 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
 
             // Lista de jogos
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: _jogosFiltrados.length,
-                itemBuilder: (ctx, i) => _buildJogoCard(_jogosFiltrados[i]),
+              child: RefreshIndicator(
+                onRefresh: _loadData,
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _jogos.length,
+                  itemBuilder: (ctx, i) => _buildJogoCard(_jogos[i]),
+                ),
               ),
             ),
           ],
         ),
 
-        // Bug do processing
+        // Loading
         if (_loading)
           Container(
             color: Colors.black54,
@@ -196,7 +225,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                   children: [
                     CircularProgressIndicator(color: Color(0xFFCC0000)),
                     SizedBox(height: 20),
-                    Text('Processando...', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text('Carregando jogos...', style: TextStyle(fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -207,16 +236,26 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
   }
 
   Widget _buildJogoCard(Map<String, dynamic> jogo) {
-    final dataHora = DateTime.parse(jogo['dataHora']);
-    final palpite = _palpites[jogo['id']];
-    final finalized = jogo['finalizado'] == true;
-    final liberado = _jogoLiberado(jogo['id']);
-    final bloqueado = _jogoBloqueado(jogo);
-
-    final gol1Controller = TextEditingController(text: palpite?['golsTime1']?.toString() ?? '');
-    final gol2Controller = TextEditingController(text: palpite?['golsTime2']?.toString() ?? '');
-
-    final ehJogoDobro = jogo['dobroPontos'] == true || jogo['jogoDoBrasil'] == true;
+    final idjogo = jogo['idjogo'];
+    final datjog = jogo['datjog'] ?? '';
+    final timeaa = jogo['timeaa'] ?? '';
+    final siglaa = jogo['siglaa'] ?? '';
+    final timebb = jogo['timebb'] ?? '';
+    final siglbb = jogo['siglbb'] ?? '';
+    final plcraa = jogo['plcraa'];
+    final plcrbb = jogo['plcrbb'];
+    
+    // Verifica se já tem placar definido (jogo finalizado)
+    final jogoFinalizado = plcraa != null && plcrbb != null && (plcraa != 0 || plcrbb != 0);
+    
+    final podeEditar = _podeEditarPalpite(datjog);
+    final ehBrasil = _ehJogoDoBrasil(jogo);
+    
+    // Palpite local (se existir)
+    final palpiteLocal = _palpitesLocais[idjogo];
+    
+    final gol1Controller = TextEditingController(text: palpiteLocal?['palpaa']?.toString() ?? '');
+    final gol2Controller = TextEditingController(text: palpiteLocal?['palpbb']?.toString() ?? '');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -225,7 +264,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: ehJogoDobro ? Colors.amber.shade200 : Colors.grey.shade200,
+            color: ehBrasil ? Colors.green.shade200 : Colors.grey.shade200,
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -238,7 +277,9 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: ehJogoDobro ? [Colors.amber.shade100, Colors.amber.shade200] : [Colors.grey.shade100, Colors.grey.shade200],
+                colors: ehBrasil 
+                    ? [Colors.green.shade100, Colors.yellow.shade100] 
+                    : [Colors.grey.shade100, Colors.grey.shade200],
               ),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
@@ -250,41 +291,30 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                     Icon(
                       Icons.sports_soccer,
                       size: 16,
-                      color: ehJogoDobro ? Colors.amber.shade700 : Colors.grey.shade600,
+                      color: ehBrasil ? Colors.green.shade700 : Colors.grey.shade600,
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      jogo['fase'],
+                      'Jogo #$idjogo',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
-                        color: ehJogoDobro ? Colors.amber.shade800 : Colors.grey.shade700,
+                        color: ehBrasil ? Colors.green.shade800 : Colors.grey.shade700,
                       ),
                     ),
-                    if (jogo['grupo']?.isNotEmpty == true) ...[
-                      const Text(' - ', style: TextStyle(fontSize: 12)),
-                      Text(jogo['grupo'], style: const TextStyle(fontSize: 12)),
-                    ],
                   ],
                 ),
                 Row(
                   children: [
-                    if (ehJogoDobro)
+                    if (ehBrasil)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         margin: const EdgeInsets.only(right: 8),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFFFFD700), Color(0xFFFFAA00)],
+                            colors: [Color(0xFF009739), Color(0xFFFFDF00)],
                           ),
                           borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.amber.shade300,
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
                         ),
                         child: const Row(
                           children: [
@@ -312,7 +342,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                           const Icon(Icons.schedule, size: 12, color: Colors.grey),
                           const SizedBox(width: 4),
                           Text(
-                            date_utils.formatDate(dataHora),
+                            _formatarData(datjog),
                             style: const TextStyle(fontSize: 11, color: Colors.grey),
                           ),
                         ],
@@ -336,12 +366,13 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                     Expanded(
                       child: Column(
                         children: [
-                          _getBandeira(jogo['bandeira1']),
+                          _getBandeira(siglaa),
                           const SizedBox(height: 8),
                           Text(
-                            jogo['time1'],
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            timeaa,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                             textAlign: TextAlign.center,
+                            maxLines: 2,
                           ),
                         ],
                       ),
@@ -349,17 +380,38 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
 
                     // Placar / Input
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: !finalized && liberado && !bloqueado
-                          ? Row(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Column(
+                        children: [
+                          // Se jogo finalizado, mostra placar oficial
+                          if (jogoFinalizado)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade800,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '$plcraa X $plcrbb',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          
+                          // Campo de palpite (se pode editar)
+                          if (!jogoFinalizado && podeEditar)
+                            Row(
                               children: [
                                 _buildScoreInput(gol1Controller),
                                 const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 12),
+                                  padding: EdgeInsets.symmetric(horizontal: 8),
                                   child: Text(
                                     'X',
                                     style: TextStyle(
-                                      fontSize: 24,
+                                      fontSize: 20,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.grey,
                                     ),
@@ -367,59 +419,60 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                                 ),
                                 _buildScoreInput(gol2Controller),
                               ],
-                            )
-                          : palpite != null
-                          ? Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            ),
+                          
+                          // Mostra palpite já feito (se existe e não pode editar)
+                          if (!jogoFinalizado && !podeEditar && palpiteLocal != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [Color(0xFFCC0000), Color(0xFF990000)],
                                 ),
-                                borderRadius: BorderRadius.circular(15),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.red.shade200,
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                '${palpite['golsTime1']} X ${palpite['golsTime2']}',
+                                '${palpiteLocal['palpaa']} X ${palpiteLocal['palpbb']}',
                                 style: const TextStyle(
-                                  fontSize: 22,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
                               ),
-                            )
-                          : Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            ),
+                          
+                          // Sem palpite e bloqueado
+                          if (!jogoFinalizado && !podeEditar && palpiteLocal == null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
-                                borderRadius: BorderRadius.circular(15),
+                                color: Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Text(
                                 '- X -',
                                 style: TextStyle(
-                                  fontSize: 22,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.grey,
                                 ),
                               ),
                             ),
+                        ],
+                      ),
                     ),
 
                     // Time 2
                     Expanded(
                       child: Column(
                         children: [
-                          _getBandeira(jogo['bandeira2']),
+                          _getBandeira(siglbb),
                           const SizedBox(height: 8),
                           Text(
-                            jogo['time2'],
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            timebb,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                             textAlign: TextAlign.center,
+                            maxLines: 2,
                           ),
                         ],
                       ),
@@ -427,70 +480,120 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                   ],
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
-                // Status / Botao
-                if (!liberado)
+                // Status / Botão
+                if (jogoFinalizado)
                   _buildStatusContainer(
-                    icon: Icons.lock,
-                    text: 'Nao liberado - R\$ 5,00',
-                    color: Colors.orange,
+                    icon: Icons.check_circle,
+                    text: 'Jogo finalizado',
+                    color: Colors.grey,
                   )
-                else if (bloqueado && !finalized)
+                else if (!podeEditar)
                   _buildStatusContainer(
                     icon: Icons.timer_off,
                     text: 'Palpites bloqueados',
+                    color: Colors.orange,
+                  )
+                else if (!UserSession.canMakePalpite() && palpiteLocal == null)
+                  _buildStatusContainer(
+                    icon: Icons.block,
+                    text: 'Limite de palpites atingido',
                     color: Colors.red,
                   )
-                else if (!finalized)
+                else
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        final palpiteData = {
-                          'id': _palpites[jogo['id']]?['id'] ?? '${DateTime.now().millisecondsSinceEpoch}',
-                          'usuarioId': widget.user['id'],
-                          'jogoId': jogo['id'],
-                          'golsTime1': int.tryParse(gol1Controller.text) ?? 0,
-                          'golsTime2': int.tryParse(gol2Controller.text) ?? 0,
-                          'dataCriacao': DateTime.now().toIso8601String(),
-                        };
-
-                        DataService.savePalpite(palpiteData);
-                        setState(() => _palpites[jogo['id']] = palpiteData);
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Row(
-                              children: [
-                                Icon(Icons.check_circle, color: Colors.white),
-                                SizedBox(width: 10),
-                                Text('Palpite salvo!'),
-                              ],
+                      onPressed: () async {
+                        final palpaa = gol1Controller.text;
+                        final palpbb = gol2Controller.text;
+                        
+                        if (palpaa.isEmpty || palpbb.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('Preencha o placar dos dois times'),
+                              backgroundColor: Colors.orange.shade600,
                             ),
-                            backgroundColor: Colors.green.shade600,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
+                          );
+                          return;
+                        }
+                        
+                        setState(() => _loading = true);
+                        
+                        final sucesso = await ApiService.salvarPalpite(
+                          idjogo: idjogo.toString(),
+                          palpaa: palpaa,
+                          palpbb: palpbb,
                         );
+                        
+                        setState(() => _loading = false);
+                        
+                        if (sucesso) {
+                          setState(() {
+                            _palpitesLocais[idjogo] = {
+                              'palpaa': palpaa,
+                              'palpbb': palpbb,
+                            };
+                          });
+                          
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Row(
+                                children: [
+                                  Icon(Icons.check_circle, color: Colors.white),
+                                  SizedBox(width: 10),
+                                  Text('Palpite salvo!'),
+                                ],
+                              ),
+                              backgroundColor: Colors.green.shade600,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Row(
+                                children: [
+                                  Icon(Icons.error, color: Colors.white),
+                                  SizedBox(width: 10),
+                                  Text('Erro ao salvar palpite'),
+                                ],
+                              ),
+                              backgroundColor: Colors.red.shade600,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFCC0000),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
                         elevation: 8,
                         shadowColor: Colors.red.shade300,
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.save, size: 20, color: Colors.white),
-                          SizedBox(width: 10),
+                          Icon(
+                            palpiteLocal != null ? Icons.edit : Icons.save,
+                            size: 18,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 8),
                           Text(
-                            'SALVAR PALPITE',
-                            style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.white),
+                            palpiteLocal != null ? 'EDITAR PALPITE' : 'SALVAR PALPITE',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                              color: Colors.white,
+                              fontSize: 13,
+                            ),
                           ),
                         ],
                       ),
@@ -506,7 +609,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
 
   Widget _buildScoreInput(TextEditingController controller) {
     return Container(
-      width: 55,
+      width: 50,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
@@ -526,7 +629,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
           LengthLimitingTextInputFormatter(2),
         ],
         style: const TextStyle(
-          fontSize: 24,
+          fontSize: 22,
           fontWeight: FontWeight.bold,
           color: Color(0xFFCC0000),
         ),
@@ -541,7 +644,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: Color(0xFFCC0000), width: 2),
           ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(vertical: 10),
         ),
       ),
     );
@@ -553,7 +656,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
@@ -562,14 +665,14 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 10),
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 8),
           Text(
             text,
             style: TextStyle(
               color: color,
               fontWeight: FontWeight.w600,
-              fontSize: 13,
+              fontSize: 12,
             ),
           ),
         ],

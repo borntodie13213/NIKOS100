@@ -3,7 +3,7 @@ import 'package:nikos/utils/micro_server_post.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/admin_screen.dart';
-import 'services/auth_service.dart';
+import 'services/user_session.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,7 +54,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   }
 
   void _onLogout() {
-    AuthService.logout();
+    UserSession.clear();
     setState(() {
       _currentUser = null;
     });

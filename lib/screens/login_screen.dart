@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../services/auth_service.dart';
+import '../services/api_service.dart';
 import 'admin_login_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -114,9 +114,11 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
       return;
     }
 
-    final dataNascimento = "$ano-$mes-$dia";
+    // Formato da API: DD/MM/AAAA
+    final dataNascimento = "$dia/$mes/$ano";
 
-    final user = AuthService.login(cpf, dataNascimento);
+    // Chamada à API real
+    final user = await ApiService.login(cpf, dataNascimento);
 
     if (user != null) {
       setState(() {
