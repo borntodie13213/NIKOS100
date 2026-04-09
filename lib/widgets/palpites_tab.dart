@@ -16,7 +16,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
   List<Map<String, dynamic>> _jogos = [];
   Map<int, Map<String, dynamic>> _palpitesLocais = {}; // Armazena palpites já feitos localmente
   bool _loading = true;
-  
+
   @override
   void initState() {
     super.initState();
@@ -25,9 +25,9 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
 
   Future<void> _loadData() async {
     setState(() => _loading = true);
-    
+
     final jogos = await ApiService.getJogos();
-    
+
     setState(() {
       _jogos = jogos;
       _loading = false;
@@ -37,18 +37,54 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
   // Converte sigla para código de bandeira
   String _getSiglaParaBandeira(String sigla) {
     final Map<String, String> siglaParaCodigo = {
-      'QAT': 'qa', 'ECU': 'ec', 'ENG': 'gb-eng', 'IRN': 'ir',
-      'ARG': 'ar', 'KSA': 'sa', 'GER': 'de', 'JPN': 'jp',
-      'BRA': 'br', 'SRB': 'rs', 'POR': 'pt', 'GHA': 'gh',
-      'FRA': 'fr', 'DEN': 'dk', 'ESP': 'es', 'CRO': 'hr',
-      'NED': 'nl', 'USA': 'us', 'MAR': 'ma', 'BEL': 'be',
-      'MEX': 'mx', 'CAN': 'ca', 'ITA': 'it', 'URU': 'uy',
-      'COL': 'co', 'CHI': 'cl', 'PER': 'pe', 'KOR': 'kr',
-      'AUS': 'au', 'NZL': 'nz', 'NGA': 'ng', 'SEN': 'sn',
-      'UAE': 'ae', 'POL': 'pl', 'SUI': 'ch', 'SWE': 'se',
-      'NOR': 'no', 'FIN': 'fi', 'ISL': 'is', 'TUR': 'tr',
-      'GRE': 'gr', 'CZE': 'cz', 'HUN': 'hu', 'SCO': 'gb-sct',
-      'IRL': 'ie', 'WAL': 'gb-wls', 'UKR': 'ua', 'CRC': 'cr',
+      'QAT': 'qa',
+      'ECU': 'ec',
+      'ENG': 'gb-eng',
+      'IRN': 'ir',
+      'ARG': 'ar',
+      'KSA': 'sa',
+      'GER': 'de',
+      'JPN': 'jp',
+      'BRA': 'br',
+      'SRB': 'rs',
+      'POR': 'pt',
+      'GHA': 'gh',
+      'FRA': 'fr',
+      'DEN': 'dk',
+      'ESP': 'es',
+      'CRO': 'hr',
+      'NED': 'nl',
+      'USA': 'us',
+      'MAR': 'ma',
+      'BEL': 'be',
+      'MEX': 'mx',
+      'CAN': 'ca',
+      'ITA': 'it',
+      'URU': 'uy',
+      'COL': 'co',
+      'CHI': 'cl',
+      'PER': 'pe',
+      'KOR': 'kr',
+      'AUS': 'au',
+      'NZL': 'nz',
+      'NGA': 'ng',
+      'SEN': 'sn',
+      'UAE': 'ae',
+      'POL': 'pl',
+      'SUI': 'ch',
+      'SWE': 'se',
+      'NOR': 'no',
+      'FIN': 'fi',
+      'ISL': 'is',
+      'TUR': 'tr',
+      'GRE': 'gr',
+      'CZE': 'cz',
+      'HUN': 'hu',
+      'SCO': 'gb-sct',
+      'IRL': 'ie',
+      'WAL': 'gb-wls',
+      'UKR': 'ua',
+      'CRC': 'cr',
     };
     return siglaParaCodigo[sigla.toUpperCase()] ?? sigla.toLowerCase();
   }
@@ -65,9 +101,9 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
         child: const Icon(Icons.flag, color: Colors.grey, size: 20),
       );
     }
-    
+
     final codigo = _getSiglaParaBandeira(sigla);
-    
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),
@@ -105,29 +141,37 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
     );
   }
 
-  // Verifica se o jogo pode receber palpite (data >= amanhã)
-  bool _podeEditarPalpite(String datjog) {
+  DateTime? _parseDatjog(String datjog) {
     try {
-      // Formato: "2026-11-20 13:00:00"
-      final partes = datjog.split(' ');
+      final normalizada = datjog.trim().replaceFirst('T', ' ');
+      final partes = normalizada.split(' ');
+      if (partes.length < 2) return null;
+
       final dataPartes = partes[0].split('-');
       final horaPartes = partes[1].split(':');
-      
-      final dataJogo = DateTime(
+      if (dataPartes.length != 3 || horaPartes.length < 2) return null;
+
+      return DateTime(
         int.parse(dataPartes[0]),
         int.parse(dataPartes[1]),
         int.parse(dataPartes[2]),
         int.parse(horaPartes[0]),
         int.parse(horaPartes[1]),
       );
-      
-      final agora = DateTime.now();
-      final amanha = DateTime(agora.year, agora.month, agora.day + 1);
-      
-      return dataJogo.isAfter(amanha) || dataJogo.isAtSameMomentAs(amanha);
     } catch (e) {
-      return false;
+      return null;
     }
+  }
+
+  bool _podeEditarPalpite(String datjog) {
+    final dataJogo = _parseDatjog(datjog);
+    if (dataJogo == null) return false;
+
+    final hoje = DateTime.now();
+    final hojeSemHora = DateTime(hoje.year, hoje.month, hoje.day);
+    final dataJogoSemHora = DateTime(dataJogo.year, dataJogo.month, dataJogo.day);
+
+    return dataJogoSemHora.isAfter(hojeSemHora);
   }
 
   // Formata data para exibição
@@ -242,18 +286,18 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
     final siglaa = jogo['siglaa'] ?? '';
     final timebb = jogo['timebb'] ?? '';
     final siglbb = jogo['siglbb'] ?? '';
-    final plcraa = jogo['plcraa'];
-    final plcrbb = jogo['plcrbb'];
-    
-    // Verifica se já tem placar definido (jogo finalizado)
-    final jogoFinalizado = plcraa != null && plcrbb != null && (plcraa != 0 || plcrbb != 0);
-    
+    final plcraa = int.tryParse('${jogo['plcraa'] ?? ''}');
+    final plcrbb = int.tryParse('${jogo['plcrbb'] ?? ''}');
     final podeEditar = _podeEditarPalpite(datjog);
+    final temPlacarOficial = plcraa != null && plcrbb != null && (plcraa != 0 || plcrbb != 0);
+
+    // Jogo só pode ser tratado como finalizado quando já está bloqueado por data
+    final jogoFinalizado = !podeEditar && temPlacarOficial;
     final ehBrasil = _ehJogoDoBrasil(jogo);
-    
+
     // Palpite local (se existir)
     final palpiteLocal = _palpitesLocais[idjogo];
-    
+
     final gol1Controller = TextEditingController(text: palpiteLocal?['palpaa']?.toString() ?? '');
     final gol2Controller = TextEditingController(text: palpiteLocal?['palpbb']?.toString() ?? '');
 
@@ -277,9 +321,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: ehBrasil 
-                    ? [Colors.green.shade100, Colors.yellow.shade100] 
-                    : [Colors.grey.shade100, Colors.grey.shade200],
+                colors: ehBrasil ? [Colors.green.shade100, Colors.yellow.shade100] : [Colors.grey.shade100, Colors.grey.shade200],
               ),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
@@ -400,7 +442,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                                 ),
                               ),
                             ),
-                          
+
                           // Campo de palpite (se pode editar)
                           if (!jogoFinalizado && podeEditar)
                             Row(
@@ -420,7 +462,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                                 _buildScoreInput(gol2Controller),
                               ],
                             ),
-                          
+
                           // Mostra palpite já feito (se existe e não pode editar)
                           if (!jogoFinalizado && !podeEditar && palpiteLocal != null)
                             Container(
@@ -440,7 +482,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                                 ),
                               ),
                             ),
-                          
+
                           // Sem palpite e bloqueado
                           if (!jogoFinalizado && !podeEditar && palpiteLocal == null)
                             Container(
@@ -508,7 +550,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                       onPressed: () async {
                         final palpaa = gol1Controller.text;
                         final palpbb = gol2Controller.text;
-                        
+
                         if (palpaa.isEmpty || palpbb.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -518,17 +560,17 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                           );
                           return;
                         }
-                        
+
                         setState(() => _loading = true);
-                        
+
                         final sucesso = await ApiService.salvarPalpite(
                           idjogo: idjogo.toString(),
                           palpaa: palpaa,
                           palpbb: palpbb,
                         );
-                        
+
                         setState(() => _loading = false);
-                        
+
                         if (sucesso) {
                           setState(() {
                             _palpitesLocais[idjogo] = {
@@ -536,7 +578,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                               'palpbb': palpbb,
                             };
                           });
-                          
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: const Row(

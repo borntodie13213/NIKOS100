@@ -15,25 +15,24 @@ class ApiService {
           "nascimento": nascimento,
         },
       );
-      
       if (resp == true || resp == null) {
         return null; // Erro
       }
-      
+
       final data = jsonDecode(resp);
       if (data['Response'] != null) {
         final List responseList = jsonDecode(data['Response']);
         if (responseList.isNotEmpty) {
           final userData = responseList[0];
           final maxPalpites = userData['max_palpites'] ?? 25;
-          
+
           // Salvar na sessão global
           UserSession.setSession(
             cpf: cgccpf,
             dataNascimento: nascimento,
             maxPalp: maxPalpites,
           );
-          
+
           return {
             'cpf': userData['cpf']?.toString() ?? cgccpf,
             'max_palpites': maxPalpites,
@@ -48,18 +47,18 @@ class ApiService {
       return null;
     }
   }
-  
+
   // ============================================
   // BUSCAR JOGOS
   // ============================================
   static Future<List<Map<String, dynamic>>> getJogos() async {
     try {
       final resp = await serverPost("bolao_get_jogos");
-      
+
       if (resp == true || resp == null) {
         return [];
       }
-      
+
       final data = jsonDecode(resp);
       if (data['Response'] != null) {
         final List responseList = jsonDecode(data['Response']);
@@ -82,7 +81,7 @@ class ApiService {
       return [];
     }
   }
-  
+
   // ============================================
   // SALVAR PALPITE
   // ============================================
@@ -92,7 +91,7 @@ class ApiService {
     required String palpbb,
   }) async {
     if (!UserSession.isLoggedIn) return false;
-    
+
     try {
       final resp = await serverPost(
         "bolao_salva_palpite",
@@ -104,11 +103,11 @@ class ApiService {
           "palpbb": palpbb,
         },
       );
-      
+
       if (resp == true) {
         return false; // Erro
       }
-      
+
       UserSession.palpitesFeitos++;
       return true;
     } catch (e) {
@@ -116,7 +115,7 @@ class ApiService {
       return false;
     }
   }
-  
+
   // ============================================
   // BUSCAR RANKING
   // ============================================
@@ -128,11 +127,11 @@ class ApiService {
           "cgccpf": UserSession.cgccpf ?? "",
         },
       );
-      
+
       if (resp == true || resp == null) {
         return [];
       }
-      
+
       final data = jsonDecode(resp);
       if (data['Response'] != null) {
         final List responseList = jsonDecode(data['Response']);
