@@ -14,7 +14,6 @@ class PalpitesTab extends StatefulWidget {
 
 class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> _jogos = [];
-  Map<int, Map<String, dynamic>> _palpitesLocais = {}; // Armazena palpites já feitos localmente
   bool _loading = true;
 
   @override
@@ -286,8 +285,10 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
     final siglaa = jogo['siglaa'] ?? '';
     final timebb = jogo['timebb'] ?? '';
     final siglbb = jogo['siglbb'] ?? '';
-    final plcraa = int.tryParse('${jogo['plcraa'] ?? ''}');
-    final plcrbb = int.tryParse('${jogo['plcrbb'] ?? ''}');
+    final plcraa = jogo['plcraa'];
+    final plcrbb = jogo['plcrbb'];
+    final usupla = jogo['usupla'];
+    final usuplb = jogo['usuplb'];
     final podeEditar = _podeEditarPalpite(datjog);
     final temPlacarOficial = plcraa != null && plcrbb != null && (plcraa != 0 || plcrbb != 0);
 
@@ -295,11 +296,16 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
     final jogoFinalizado = !podeEditar && temPlacarOficial;
     final ehBrasil = _ehJogoDoBrasil(jogo);
 
-    // Palpite local (se existir)
-    final palpiteLocal = _palpitesLocais[idjogo];
+    final Map<String, dynamic>? palpiteServidor = usupla != null && usuplb != null
+        ? {
+            'palpaa': usupla,
+            'palpbb': usuplb,
+          }
+        : null;
+    final palpiteAtual = palpiteServidor;
 
-    final gol1Controller = TextEditingController(text: palpiteLocal?['palpaa']?.toString() ?? '');
-    final gol2Controller = TextEditingController(text: palpiteLocal?['palpbb']?.toString() ?? '');
+    final gol1Controller = TextEditingController(text: palpiteAtual == null ? '' : '${palpiteAtual['palpaa']}');
+    final gol2Controller = TextEditingController(text: palpiteAtual == null ? '' : '${palpiteAtual['palpbb']}');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -464,7 +470,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                             ),
 
                           // Mostra palpite já feito (se existe e não pode editar)
-                          if (!jogoFinalizado && !podeEditar && palpiteLocal != null)
+                          if (!jogoFinalizado && !podeEditar && palpiteAtual != null)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               decoration: BoxDecoration(
@@ -474,7 +480,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                '${palpiteLocal['palpaa']} X ${palpiteLocal['palpbb']}',
+                                '${palpiteAtual['palpaa']} X ${palpiteAtual['palpbb']}',
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -484,7 +490,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                             ),
 
                           // Sem palpite e bloqueado
-                          if (!jogoFinalizado && !podeEditar && palpiteLocal == null)
+                          if (!jogoFinalizado && !podeEditar && palpiteAtual == null)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               decoration: BoxDecoration(
@@ -537,7 +543,7 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                     text: 'Palpites bloqueados',
                     color: Colors.orange,
                   )
-                else if (!UserSession.canMakePalpite() && palpiteLocal == null)
+                else if (!UserSession.canMakePalpite() && palpiteAtual == null)
                   _buildStatusContainer(
                     icon: Icons.block,
                     text: 'Limite de palpites atingido',
@@ -568,17 +574,10 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                           palpaa: palpaa,
                           palpbb: palpbb,
                         );
-
-                        setState(() => _loading = false);
+                        await _loadData();
+                        if (!mounted) return;
 
                         if (sucesso) {
-                          setState(() {
-                            _palpitesLocais[idjogo] = {
-                              'palpaa': palpaa,
-                              'palpbb': palpbb,
-                            };
-                          });
-
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: const Row(
@@ -623,13 +622,13 @@ class _PalpitesTabState extends State<PalpitesTab> with SingleTickerProviderStat
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            palpiteLocal != null ? Icons.edit : Icons.save,
+                            palpiteAtual != null ? Icons.edit : Icons.save,
                             size: 18,
                             color: Colors.white,
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            palpiteLocal != null ? 'EDITAR PALPITE' : 'SALVAR PALPITE',
+                            palpiteAtual != null ? 'EDITAR PALPITE' : 'SALVAR PALPITE',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1,

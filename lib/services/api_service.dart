@@ -53,7 +53,7 @@ class ApiService {
   // ============================================
   static Future<List<Map<String, dynamic>>> getJogos() async {
     try {
-      final resp = await serverPost("bolao_get_jogos");
+      final resp = await serverPost("bolao_get_jogos", myJson: {"cgccpf": UserSession.cgccpf});
 
       if (resp == true || resp == null) {
         return [];
@@ -72,6 +72,8 @@ class ApiService {
             'siglbb': item['siglbb'],
             'plcraa': item['plcraa'],
             'plcrbb': item['plcrbb'],
+            'usupla': item['usupla'],
+            'usuplb': item['usuplb'],
           };
         }).toList();
       }

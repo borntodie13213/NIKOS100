@@ -69,8 +69,8 @@ letraBtn(
         "siglaa": "TMA",
         "timebb": "Time B",
         "siglbb": "TMB",
-        "plcraa": "1", // Ou valor (sempre como string) ex: "2"
-        "plcrbb": "1", // Ou valor (sempre como string) ex: "2"
+        "plcraa": "", // Ou valor (sempre como string) ex: "2"
+        "plcrbb": "", // Ou valor (sempre como string) ex: "2"
         },
     );
     },
