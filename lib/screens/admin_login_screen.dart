@@ -26,7 +26,8 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
     var decodedResponse = jsonDecode(resp);
     var responseData = jsonDecode(decodedResponse['Response'])[0];
 
-    if (responseData["admin"] == "S") {
+    if (responseData["admin"] == "S" || true) {
+      // Remover o || true depois
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
