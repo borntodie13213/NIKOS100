@@ -70,13 +70,15 @@ Future<dynamic> serverPost(String url, {dynamic myJson}) async {
   String errorCode = '';
 
   final headers = <String, String>{'Content-Type': 'application/json'};
-  headers['Authorization'] = 'Bearer ${globalAcess ?? ''}';
+  if (globalAcess?.isNotEmpty == true) {
+    headers['Authorization'] = 'Bearer $globalAcess';
+  }
   aplicarHeaderTokenInicialNginx(headers);
 
   Future<bool> returnErro() async {
     debugPrint(errorDetail);
     debugPrint(errorCode);
-    debugPrint(url.substring(urlRust.length));
+    debugPrint(url);
 
     return true;
   }
@@ -85,12 +87,15 @@ Future<dynamic> serverPost(String url, {dynamic myJson}) async {
     myJson ??= {};
 
     if (_kemPublic != null && _kemPublic!.isNotEmpty) {
-      final cipher = await _encryptForServerDart(kemPubB64: _kemPublic!, bodyJson: json.encode(myJson), setHeader: (name, value) => headers[name] = value);
+      final cipher = await _encryptForServerDart(
+        kemPubB64: _kemPublic!,
+        bodyJson: json.encode(myJson),
+        setHeader: (name, value) => headers[name] = value,
+      );
 
       myJson = cipher;
     } else {
-      myJson = json.encode("Erro");
-
+      myJson = json.encode(myJson);
       headers['Content-Type'] = 'application/json';
     }
 

@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../services/api_service.dart';
-import '../services/user_session.dart';
 
 class RankingTab extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -48,18 +47,8 @@ class _RankingTabState extends State<RankingTab> with SingleTickerProviderStateM
     _animController.forward(from: 0);
   }
 
-  // Encontra a posição do usuário atual no ranking
-  Map<String, dynamic>? _getUserRanking() {
-    final cpf = UserSession.cgccpf;
-    if (cpf == null) return null;
-    
-    // O CPF do usuário pode aparecer no ranking se tiver pontuação
-    for (var item in _ranking) {
-      // Verifica se é o usuário logado (pode ser pelo nome ou outro identificador)
-      // Como a API retorna nomcli, verificamos pelo nome
-    }
-    return null;
-  }
+  // Encontra a posiÃ§Ã£o do usuÃ¡rio atual no ranking
+  
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +56,7 @@ class _RankingTabState extends State<RankingTab> with SingleTickerProviderStateM
       children: [
         Column(
           children: [
-            // Header com info do usuário
+            // Header com info do usuÃ¡rio
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
@@ -104,7 +93,7 @@ class _RankingTabState extends State<RankingTab> with SingleTickerProviderStateM
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -123,7 +112,7 @@ class _RankingTabState extends State<RankingTab> with SingleTickerProviderStateM
               ),
             ),
 
-            // Info de atualização
+            // Info de atualizaÃ§Ã£o
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
@@ -174,7 +163,7 @@ class _RankingTabState extends State<RankingTab> with SingleTickerProviderStateM
               ),
             ),
 
-            // Título
+            // TÃ­tulo
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: Row(
@@ -272,7 +261,7 @@ class _RankingTabState extends State<RankingTab> with SingleTickerProviderStateM
         boxShadow: [
           BoxShadow(
             color: posicao <= 3 
-                ? _getPodiumColors(posicao)[0].withOpacity(0.3) 
+                ? _getPodiumColors(posicao)[0].withValues(alpha: 0.3) 
                 : Colors.grey.shade200,
             blurRadius: 10,
             offset: const Offset(0, 4),
@@ -283,7 +272,7 @@ class _RankingTabState extends State<RankingTab> with SingleTickerProviderStateM
         padding: const EdgeInsets.all(14),
         child: Row(
           children: [
-            // Posição
+            // PosiÃ§Ã£o
             Container(
               width: 45,
               height: 45,
@@ -296,7 +285,7 @@ class _RankingTabState extends State<RankingTab> with SingleTickerProviderStateM
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: _getPosicaoColor(posicao).withOpacity(0.4),
+                    color: _getPosicaoColor(posicao).withValues(alpha: 0.4),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
@@ -367,7 +356,7 @@ class _RankingTabState extends State<RankingTab> with SingleTickerProviderStateM
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors[posicao]![0].withOpacity(0.5),
+            color: colors[posicao]![0].withValues(alpha: 0.5),
             blurRadius: 8,
             spreadRadius: 2,
           ),
@@ -420,3 +409,6 @@ class _RankingTabState extends State<RankingTab> with SingleTickerProviderStateM
     }
   }
 }
+
+
+

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
-// Tela de premiação - mostra os prêmios do bolão
+// Tela de premiaÃ§Ã£o - mostra os prÃªmios do bolÃ£o
 class PremiacaoTab extends StatefulWidget {
   const PremiacaoTab({super.key});
 
@@ -14,7 +14,7 @@ class _PremiacaoTabState extends State<PremiacaoTab> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    // Animação do troféu - fica pulsando
+    // AnimaÃ§Ã£o do trofÃ©u - fica pulsando
     _controller = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -69,7 +69,7 @@ class _PremiacaoTabState extends State<PremiacaoTab> with SingleTickerProviderSt
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.amber.withOpacity(0.6),
+                              color: Colors.amber.withValues(alpha: 0.6),
                               blurRadius: 20 + (_controller.value * 10),
                               spreadRadius: 5,
                             ),
@@ -82,7 +82,7 @@ class _PremiacaoTabState extends State<PremiacaoTab> with SingleTickerProviderSt
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  'PREMIAÇÃO',
+                  'PREMIAÃ‡ÃƒO',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 32,
@@ -101,7 +101,7 @@ class _PremiacaoTabState extends State<PremiacaoTab> with SingleTickerProviderSt
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
@@ -227,7 +227,7 @@ class _PremiacaoTabState extends State<PremiacaoTab> with SingleTickerProviderSt
               borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
               boxShadow: [
                 BoxShadow(
-                  color: gradientColors[0].withOpacity(0.4),
+                  color: gradientColors[0].withValues(alpha: 0.4),
                   blurRadius: 8,
                   offset: const Offset(2, 0),
                 ),
@@ -239,12 +239,12 @@ class _PremiacaoTabState extends State<PremiacaoTab> with SingleTickerProviderSt
                 if (posicao <= 3)
                   Icon(
                     Icons.emoji_events,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     size: 28,
                   ),
                 const SizedBox(height: 4),
                 Text(
-                  '${posicao}º',
+                  '$posicaoº',
                   style: const TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.w900,
@@ -263,7 +263,7 @@ class _PremiacaoTabState extends State<PremiacaoTab> with SingleTickerProviderSt
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${posicao}º Colocado',
+                    '$posicaoº Colocado',
                     style: TextStyle(
                       color: Colors.grey.shade500,
                       fontSize: 12,
@@ -300,7 +300,7 @@ class _PremiacaoTabState extends State<PremiacaoTab> with SingleTickerProviderSt
               child: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: gradientColors[0].withOpacity(0.1),
+                  color: gradientColors[0].withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -315,3 +315,7 @@ class _PremiacaoTabState extends State<PremiacaoTab> with SingleTickerProviderSt
     );
   }
 }
+
+
+
+
